@@ -29,7 +29,9 @@ with open('fileList.log') as f:
 # Input source
 process.source = cms.Source("PoolSource",
     secondaryFileNames = cms.untracked.vstring(),
+
     fileNames = cms.untracked.vstring(lines)
+
 )
 
 
