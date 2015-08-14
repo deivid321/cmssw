@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process('RECODQM')
 
+
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
@@ -15,12 +16,16 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load("DQMServices.Core.DQM_cfg")
 process.load("DQMServices.Components.DQMEnvironment_cfi")
 
+process.DQMStore.LSbasedMode = cms.untracked.bool(True)
+process.DQMStore.verbose = cms.untracked.int32(4)
+
 # my analyzer
 process.load('DQMServices.Examples.test.DQMExample_Step1_cfi')
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(200)
+    #input = cms.untracked.int32(200)
+	input = cms.untracked.int32(200)
 )
 
 with open('fileList.log') as f:
