@@ -23,11 +23,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 
-//Candidate handling
-#include "DataFormats/Candidate/interface/Candidate.h"
-#include "DataFormats/Candidate/interface/CandidateFwd.h"
-
-
 //CORAL includes
 #include "RelationalAccess/ConnectionService.h"
 

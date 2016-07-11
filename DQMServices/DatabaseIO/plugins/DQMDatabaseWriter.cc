@@ -459,8 +459,6 @@ void DQMDatabaseWriter::dqmDbRunInitialize(std::vector < std::pair <MonitorEleme
 //
 void DQMDatabaseWriter::processLumi(int run)
 {
-  coral::ISchema& schema = m_session->nominalSchema();
-
   for (std::vector<std::pair <MonitorElement *, HistogramValues> >::iterator it = histogramsPerRun.begin() ; it != histogramsPerRun.end(); ++it)
   {
     if((*it).second.test_entries != 0)
