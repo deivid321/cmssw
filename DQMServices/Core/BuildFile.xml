@@ -7,7 +7,6 @@
 <use   name="classlib"/>
 <use   name="roothistmatrix"/>
 <use   name="protobuf"/>
-<use   name="RelationalAccess"/>
 <export>
   <lib   name="1"/>
 </export>
