@@ -16,7 +16,7 @@ process.load("DQMServices.Core.DQM_cfg")
 process.load("DQMServices.Components.DQMEnvironment_cfi")
 
 # my client and my Tests
-process.load('DQMServices.Examples.test.DQMDatabaseHarvester_cfi')
+process.load('DQMServices.Examples.test.DQMExample_Step2_DQMDatabaseHarvester_cfi')
 process.load('DQMServices.Examples.test.DQMExample_GenericClient_cfi')
 process.load('DQMServices.Examples.test.DQMExample_qTester_cfi')
 
