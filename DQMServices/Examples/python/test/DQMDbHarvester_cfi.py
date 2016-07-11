@@ -1,8 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
-DQMDbHarvester = cms.EDAnalyzer("DQMDbHarvester",
+DQMDbHarvester = cms.EDAnalyzer("DQMDatabaseHarvester",
        numMonitorName = cms.string("Physics/TopTest/ElePt_leading_HLT_matched"),
-       denMonitorName = cms.string("Physics/TopTest/ElePt_leading"),   
+       denMonitorName = cms.string("Physics/TopTest/ElePt_leading"),
+          histogramsPath = cms.string("Physics/TopTest/"),   
 	   #histogramsPerLumi = cms.vstring("Physics\/TopTest\/Vertex_number","Physics\/TopTest\/pfMet","Physics\/TopTest\/NElectrons","Physics\/TopTest\/ElePt_leading","Physics\/TopTest\/EleEta_leading","Physics\/TopTest\/ElePhi_leading"),
 	   histogramsPerLumi = cms.vstring("Physics\/TopTest\/Vertex_number","Physics\/TopTest\/pfMet","Physics\/TopTest\/NElectrons"),
 	   histogramsPerRun = cms.vstring("Physics\/TopTest\/ElePt_leading","Physics\/TopTest\/EleEta_leading","Physics\/TopTest\/ElePhi_leading"),
