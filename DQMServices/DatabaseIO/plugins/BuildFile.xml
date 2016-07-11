@@ -1,0 +1,12 @@
+<library   file="*.cc" name="DQMServicesDatabaseIOPlugins">
+  <flags   EDM_PLUGIN="1"/>
+  <use   name="CoralBase"/>
+  <use   name="CoralKernel"/>
+  <use   name="RelationalAccess"/>
+  <use   name="FWCore/Framework"/>
+  <use   name="FWCore/MessageLogger"/>
+  <use   name="FWCore/ParameterSet"/>
+  <use   name="FWCore/ServiceRegistry"/>
+  <use   name="FWCore/Utilities"/>
+  <use   name="DQMServices/Core"/>
+</library>
