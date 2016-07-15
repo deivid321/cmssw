@@ -124,10 +124,33 @@ void DQMStreamStats::writeJson(const std::string &fn, const HistoStats &stats) {
   doc.put("update_timestamp", std::time(NULL));
 
   ptree histograms;
+  
+  ptree info;
+  ptree paths;
+  ptree types;
+  ptree bin_counts;
+  ptree bin_sizes;
+  ptree extras;
+  ptree totals;
 
   for (auto &stat : stats) {
-    ptree child;
+    
+    ptree infoChild;
 
+    infoChild.put("", stat.path);
+    paths.push_back(std::make_pair("", infoChild));
+    infoChild.put("", stat.type);
+    types.push_back(std::make_pair("", infoChild));
+    infoChild.put("", stat.bin_count);
+    bin_counts.push_back(std::make_pair("", infoChild));
+    infoChild.put("", stat.bin_size);
+    bin_sizes.push_back(std::make_pair("", infoChild));
+    infoChild.put("", stat.extra);
+    extras.push_back(std::make_pair("", infoChild));
+    infoChild.put("", stat.total);
+    totals.push_back(std::make_pair("", infoChild));
+
+    ptree child;
     child.put("path", stat.path);
     child.put("type", stat.type);
     child.put("bin_count", stat.bin_count);
@@ -137,6 +160,14 @@ void DQMStreamStats::writeJson(const std::string &fn, const HistoStats &stats) {
 
     histograms.push_back(std::make_pair("", child));
   }
+
+  info.add_child("path", paths);
+  info.add_child("type", types);
+  info.add_child("bin_count", bin_counts);
+  info.add_child("bin_size", bin_sizes);
+  info.add_child("extra", extras);
+  info.add_child("total", totals);
+  histograms.push_front(std::make_pair("", info));
 
   doc.add_child("histograms", histograms);
 
@@ -150,6 +181,7 @@ void DQMStreamStats::dqmEndLuminosityBlock(DQMStore::IBooker &,
                                            edm::LuminosityBlock const &,
                                            edm::EventSetup const &) {
   HistoStats st = collect(iGetter);
+  writeJson("outputJson", st);
 }
 
 #if 0
