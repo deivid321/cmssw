@@ -46,15 +46,6 @@ class HistoEntry {
   double entries = 0;
   int maxBin = 0, minBin = 0;
   double maxValue = 0, minValue = 0;
-  /*int nXBin = 0;
-  double xLow = 0, xUp = 0;
-  int nYBin = 0;
-  double yLow = 0, yUp = 0;
-  int nZBin = 0;
-  double zLow = 0, zUp = 0;
-  double xMean = 0, xMeanError = 0, xRms = 0, xRmsError = 0, xUnderflow = 0, xOverflow = 0;
-  double yMean = 0, yMeanError = 0, yRms = 0, yRmsError = 0;
-  double zMean = 0, zMeanError = 0, zRms = 0, zRmsError = 0; */
   Dimension dimX, dimY, dimZ; 
 
   bool operator<(const HistoEntry &rhs) const { return path < rhs.path; }
