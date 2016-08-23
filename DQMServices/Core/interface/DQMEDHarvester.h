@@ -31,6 +31,7 @@ public:
   virtual void endJob() final;
   virtual void dqmEndLuminosityBlock(DQMStore::IBooker &, DQMStore::IGetter &, edm::LuminosityBlock const &, edm::EventSetup const&) {};
   virtual void dqmEndJob(DQMStore::IBooker &, DQMStore::IGetter &) = 0;
+  virtual void dqmEndRun(DQMStore::IBooker &, DQMStore::IGetter &, edm::Run const&, edm::EventSetup const&) {};
 
 private:
 

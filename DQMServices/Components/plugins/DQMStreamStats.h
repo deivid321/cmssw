@@ -23,7 +23,17 @@
 #include "DQMServices/Core/interface/DQMEDHarvester.h"
 #include "DQMServices/Core/interface/MonitorElement.h"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 namespace dqmservices {
+
+struct Node{
+  std::string name;
+  long size;
+  std::string parent;
+  std::vector<Node> children;
+};
 
 struct Dimension{
   int nBin = 0;
@@ -55,7 +65,9 @@ typedef std::set<HistoEntry> HistoStats;
 
 class DQMStreamStats : public DQMEDHarvester {
  public:
-  DQMStreamStats(edm::ParameterSet const &);
+
+  DQMStreamStats(edm::ParameterSet const & iConfig);
+
   virtual ~DQMStreamStats();
 
   // static std::unique_ptr<Stats> initializeGlobalCache(edm::ParameterSet
@@ -69,6 +81,10 @@ class DQMStreamStats : public DQMEDHarvester {
   void dqmEndJob(DQMStore::IBooker &iBooker,
                  DQMStore::IGetter &iGetter) override{};
 
+  void dqmEndRun(DQMStore::IBooker &, DQMStore::IGetter &,
+              edm::Run const&, 
+              edm::EventSetup const&) override;
+
   // analyze a single monitor element
   HistoEntry analyze(MonitorElement *m);
 
@@ -81,9 +97,21 @@ class DQMStreamStats : public DQMEDHarvester {
   void writeHistogramJson(const std::string &fn, const HistoStats &stats);
 
  private:
+  std::string getStepName();
+  void folderis(Node &node, boost::property_tree::ptree &info);
+  Node buildHierarchy(const HistoStats &stats);
   void getDimensionX(Dimension &d, MonitorElement *m);
   void getDimensionY(Dimension &d, MonitorElement *m);
   void getDimensionZ(Dimension &d, MonitorElement *m);
+
+  std::string workflow_;
+  std::string   child_;
+  std::string producer_;
+  std::string dirName_;
+  std::string fileBaseName_;
+  bool dumpOnEndLumi_;
+  bool dumpOnEndRun_;
+  std::string processName_;
 };
 
 }  // end of namespace

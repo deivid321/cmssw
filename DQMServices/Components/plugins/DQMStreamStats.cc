@@ -2,14 +2,22 @@
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
-#include <boost/property_tree/json_parser.hpp>
-#include <boost/property_tree/ptree.hpp>
-
 #include "FWCore/Framework/interface/MakerMacros.h"
+
+#include <chrono>
+#include <ctime>
 
 namespace dqmservices {
 
-DQMStreamStats::DQMStreamStats(edm::ParameterSet const &) {}
+DQMStreamStats::DQMStreamStats(edm::ParameterSet const & iConfig) 
+    :workflow_ (""),
+    child_ (""),
+    producer_ ("DQM"),
+    dirName_ ("."),
+    fileBaseName_ (""),
+    dumpOnEndLumi_(iConfig.getUntrackedParameter<bool>("dumpOnEndLumi", false)),
+    dumpOnEndRun_(iConfig.getUntrackedParameter<bool>("dumpOnEndRun", false))
+    {}
 
 DQMStreamStats::~DQMStreamStats() {}
 
@@ -158,6 +166,7 @@ HistoStats DQMStreamStats::collect(DQMStore::IGetter &iGetter) {
 
   // correct stream id don't matter - no booking will be done
   iGetter.getAllContents_(collect_f, "");
+
   return st;
 }
 
@@ -207,39 +216,13 @@ void DQMStreamStats::writeMemoryJson(const std::string &fn, const HistoStats &st
     ptree child;
     child.put("", stat.path);
     paths.push_back(std::make_pair("", child));
-    child.put("", stat.type);
-    types.push_back(std::make_pair("", child));
-    child.put("", stat.bin_count);
-    bin_counts.push_back(std::make_pair("", child));
-    child.put("", stat.bin_size);
-    bin_sizes.push_back(std::make_pair("", child));
-    child.put("", stat.extra);
-    extras.push_back(std::make_pair("", child));
     child.put("", stat.total);
     totals.push_back(std::make_pair("", child));
-    child.put("", stat.entries);
-    entries.push_back(std::make_pair("", child));
-    child.put("", stat.maxBin);
-    maxBins.push_back(std::make_pair("", child));
-    child.put("", stat.minBin);
-    minBins.push_back(std::make_pair("", child));
-    child.put("", stat.maxValue);
-    maxValues.push_back(std::make_pair("", child));
-    child.put("", stat.minValue);
-    minValues.push_back(std::make_pair("", child));
   }
 
   info.add_child("path", paths);
-  info.add_child("type", types);
-  info.add_child("bin_count", bin_counts);
-  info.add_child("bin_size", bin_sizes);
-  info.add_child("extra", extras);
   info.add_child("total", totals);
-  info.add_child("entries", entries);
-  info.add_child("maxBin", maxBins);
-  info.add_child("minBin", minBins);
-  info.add_child("maxValues", maxValues);
-  info.add_child("minValues", minValues);
+
   histograms.push_back(std::make_pair("", info));
 
   doc.add_child("histograms", histograms);
@@ -372,13 +355,68 @@ void DQMStreamStats::writeHistogramJson(const std::string &fn, const HistoStats 
   file.close();
 };
 
+static std::string onlineOfflineFileName(const std::string &fileBaseName,
+                      const std::string &suffix,
+                      const std::string &workflow,
+                      const std::string &child)
+{
+  size_t pos = 0;
+  std::string wflow;
+  wflow.reserve(workflow.size() + 3);
+  wflow = workflow;
+  while ((pos = wflow.find('/', pos)) != std::string::npos)
+    wflow.replace(pos++, 1, "__");
+
+  std::string filename = fileBaseName + suffix + wflow + child + ".json";
+  return filename;
+}
+
+std::string DQMStreamStats::getStepName(){
+   std::ifstream comm("/proc/self/cmdline");
+      std::string name;
+      getline(comm, name);
+      name = name.substr(name.find('\0', 0)+1);
+      name = name.substr(0, name.find('\0', 0)-3);
+      return name;
+}
+
 void DQMStreamStats::dqmEndLuminosityBlock(DQMStore::IBooker &,
                                            DQMStore::IGetter &iGetter,
-                                           edm::LuminosityBlock const &,
+                                           edm::LuminosityBlock const &iLS,
                                            edm::EventSetup const &) {
-  HistoStats st = collect(iGetter);
-  writeMemoryJson("MemoryJson", st);
-  writeHistogramJson("HistogramJson", st);
+
+  if (dumpOnEndLumi_){
+    HistoStats st = collect(iGetter);
+    int irun     = iLS.id().run();
+    int ilumi    = iLS.id().luminosityBlock();
+    char suffix[64];
+    sprintf(suffix, "R%09d", irun);
+    sprintf(suffix, "LS%09d", ilumi);
+    workflow_ = "Default";
+    dirName_ = getStepName();
+    fileBaseName_ = dirName_ + "_" + producer_;// + version;
+    std::string fileName = onlineOfflineFileName(fileBaseName_, std::string(suffix), workflow_, child_);
+    std::cout << "name " << fileName<<std::endl;
+    writeMemoryJson(fileName, st);
+  }
+}
+
+void DQMStreamStats::dqmEndRun(DQMStore::IBooker &, 
+                            DQMStore::IGetter &iGetter,
+                            edm::Run const &iRun, 
+                            edm::EventSetup const&) {
+  if (dumpOnEndRun_){
+    HistoStats st = collect(iGetter);
+    int irun     = iRun.moduleCallingContext()->moduleDescription()->id();
+    char suffix[64];
+    sprintf(suffix, "R%09d", irun);
+    workflow_ = "Default";
+    dirName_ = getStepName();
+    fileBaseName_ = dirName_ + "_" + producer_;// + version;
+    std::string fileName = onlineOfflineFileName(fileBaseName_, std::string(suffix), workflow_, child_);
+    writeMemoryJson(fileName, st);
+  }
+
 }
 
 #if 0
