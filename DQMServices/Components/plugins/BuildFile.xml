@@ -1,3 +1,6 @@
+<use   name="CoralKernel"/>
+<use   name="CoralBase"/>
+<use   name="RelationalAccess"/>
 <use   name="DQMServices/Core"/>
 <use   name="DQMServices/Components"/>
 <use   name="DataFormats/Histograms"/>

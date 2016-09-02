@@ -1,0 +1,342 @@
+#include "FWCore/Framework/interface/MakerMacros.h"
+
+#include "DQMDatabaseWriter.h"
+
+// CORAL
+#include "CoralKernel/Context.h"
+#include "CoralKernel/IProperty.h"
+#include "CoralKernel/IPropertyManager.h"
+#include "CoralBase/AttributeList.h"
+#include "CoralBase/Attribute.h"
+#include "RelationalAccess/IConnectionServiceConfiguration.h"
+#include "RelationalAccess/ISchema.h"
+#include "RelationalAccess/ITransaction.h"
+#include "RelationalAccess/ITable.h"
+#include "RelationalAccess/ITableDataEditor.h"
+#include "RelationalAccess/IQuery.h"
+#include "RelationalAccess/ICursor.h"
+
+//
+// -------------------------------------- Constructor --------------------------------------------
+//
+DQMDatabaseWriter::DQMDatabaseWriter(const edm::ParameterSet& ps) : m_connectionService(), m_session(), m_connectionString( "" )
+{
+  edm::LogInfo("DQMDatabaseWriter") <<  "Constructor DQMDatabaseWriter::" << __func__ << std::endl;
+
+  //Database connection configuration parameters
+  edm::ParameterSet connectionParameters = ps.getParameter<edm::ParameterSet>("DBParameters");
+  std::string authPath = connectionParameters.getUntrackedParameter<std::string>("authenticationPath", "");
+  int messageLevel = connectionParameters.getUntrackedParameter<int>("messageLevel",0);
+  coral::MsgLevel level = coral::Error;
+  switch (messageLevel) {
+  case 0 :
+    level = coral::Error;
+    break;
+  case 1 :
+    level = coral::Warning;
+    break;
+  case 2 :
+    level = coral::Info;
+    break;
+  case 3 :
+    level = coral::Debug;
+    break;
+  default:
+    level = coral::Error;
+  }
+  bool enableConnectionSharing = connectionParameters.getUntrackedParameter<bool>("enableConnectionSharing",true);
+  int connectionTimeOut = connectionParameters.getUntrackedParameter<int>("connectionTimeOut",600);
+  bool enableReadOnlySessionOnUpdateConnection = connectionParameters.getUntrackedParameter<bool>("enableReadOnlySessionOnUpdateConnection",true);
+  int connectionRetrialPeriod = connectionParameters.getUntrackedParameter<int>("connectionRetrialPeriod",30);
+  int connectionRetrialTimeOut = connectionParameters.getUntrackedParameter<int>("connectionRetrialTimeOut",180);
+  bool enablePoolAutomaticCleanUp = connectionParameters.getUntrackedParameter<bool>("enablePoolAutomaticCleanUp",false);
+  //connection string
+  m_connectionString = ps.getParameter<std::string>("connect");
+  //now configure the DB connection
+  coral::IConnectionServiceConfiguration& coralConfig = m_connectionService.configuration();
+
+  // message streaming
+  coral::MessageStream::setMsgVerbosity( level );
+  //connection sharing
+  if(enableConnectionSharing) coralConfig.enableConnectionSharing();
+  else coralConfig.disableConnectionSharing();
+  //connection timeout
+  coralConfig.setConnectionTimeOut(connectionTimeOut);
+  //read-only session on update connection
+  if(enableReadOnlySessionOnUpdateConnection) coralConfig.enableReadOnlySessionOnUpdateConnections();
+  else coralConfig.disableReadOnlySessionOnUpdateConnections();
+  //connection retrial period
+  coralConfig.setConnectionRetrialPeriod( connectionRetrialPeriod );
+  //connection retrial timeout
+  coralConfig.setConnectionRetrialTimeOut( connectionRetrialTimeOut );
+  //pool automatic cleanup
+  if(enablePoolAutomaticCleanUp) coralConfig.enablePoolAutomaticCleanUp();
+  else coralConfig.disablePoolAutomaticCleanUp();
+
+  //authentication
+  coral::Context::instance().PropertyManager().property("AuthenticationFile")->set(authPath);
+
+  m_session.reset( m_connectionService.connect( m_connectionString, coral::Update ) );
+
+}
+
+//
+// -- Destructor
+//
+DQMDatabaseWriter::~DQMDatabaseWriter()
+{
+  edm::LogInfo("DQMDatabaseWriter") <<  "Destructor DQMDatabaseWriter::" << __func__ << std::endl;
+}
+
+void DQMDatabaseWriter::startTransaction(bool readOnly)
+{
+  m_session->transaction().start( readOnly );
+
+}
+
+void DQMDatabaseWriter::commitTransaction()
+{
+  m_session->transaction().commit();
+
+}
+
+void DQMDatabaseWriter::rollbackTransaction()
+{
+  m_session->transaction().rollback();
+}
+
+//
+// -------------------------------------- dqmDbDrop --------------------------------------------
+//
+void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, unsigned int run)
+{
+  edm::LogInfo("DQMDatabaseWriter") <<  "DQMDatabaseWriter::" << __func__ << std::endl;
+  bool histogramRecordExist;
+  bool histogramPropsRecordExist;
+  coral::ISchema& schema = m_session->nominalSchema();
+  for (auto histogram : stats)
+  {
+    histogramRecordExist = false;
+    {
+      std::unique_ptr<coral::IQuery> queryHistogramProps(schema.tableHandle( "HISTOGRAM" ).newQuery());
+      queryHistogramProps->addToOutputList( "PATH" );
+      std::string condition = "PATH = :path";
+      coral::AttributeList conditionData2;
+      conditionData2.extend< std::string >("path");
+      conditionData2["path"].data< std::string >() = histogram.path; 
+      queryHistogramProps->setCondition( condition, conditionData2 );
+      queryHistogramProps->setMemoryCacheSize( 5 );
+      coral::ICursor& cursor2 = queryHistogramProps->execute();
+      if (cursor2.next()){
+        //cursor2.currentRow().toOutputStream( std::cout ) << std::endl;
+        histogramRecordExist = true;
+      }
+      if (!histogramRecordExist)
+      {
+        coral::ITableDataEditor& editor = m_session->nominalSchema().tableHandle( "HISTOGRAM" ).dataEditor();
+        coral::AttributeList insertData;
+        insertData.extend< std::string >( "PATH" );
+        insertData.extend< unsigned int >( "TIMESTAMP" );
+        insertData.extend< std::string >( "TITLE" );
+
+        insertData[ "PATH" ].data< std::string >() = histogram.path;
+        insertData[ "TIMESTAMP" ].data< unsigned int >() = std::time(nullptr);
+        insertData[ "TITLE" ].data< std::string >() = histogram.path;
+        editor.insertRow( insertData );
+      }
+    }
+
+    histogramPropsRecordExist = false;
+    {
+      if (histogramRecordExist){
+        std::unique_ptr<coral::IQuery> queryHistogramProps(schema.tableHandle( "HISTOGRAM_PROPS" ).newQuery());
+        queryHistogramProps->addToOutputList( "PATH" );
+        queryHistogramProps->addToOutputList( "RUN_NUMBER" );
+        queryHistogramProps->addToOutputList( "DIMENSIONS" );
+        queryHistogramProps->addToOutputList( "X_AXIS" );
+        queryHistogramProps->addToOutputList( "Y_AXIS" );
+        queryHistogramProps->addToOutputList( "Z_AXIS" );
+
+        std::string condition = "PATH = :path AND RUN_NUMBER <= :run";
+        coral::AttributeList conditionData2;
+        conditionData2.extend< std::string >("path");
+        conditionData2["path"].data< std::string >() = histogram.path;
+        conditionData2.extend< unsigned int >("run");
+        conditionData2["run"].data< unsigned int >() = run; 
+        queryHistogramProps->setCondition( condition, conditionData2 );
+        queryHistogramProps->setMemoryCacheSize( 5 );
+        coral::AttributeList readBuffer;
+        readBuffer.extend<std::string>("PATH");
+        readBuffer.extend<unsigned int>("RUN_NUMBER");
+        readBuffer.extend<int>("DIMENSIONS");
+        readBuffer.extend< std::string >( "X_AXIS" );
+        readBuffer.extend< std::string >( "Y_AXIS" );
+        readBuffer.extend< std::string >( "Z_AXIS" );
+        queryHistogramProps->defineOutput(readBuffer);
+        coral::ICursor& cursor2 = queryHistogramProps->execute();
+        unsigned int diff = UINT_MAX;
+        coral::AttributeList row;
+        if (cursor2.next()){
+          //cursor2.currentRow().toOutputStream( std::cout ) << std::endl;
+          unsigned int runNumber = cursor2.currentRow()["RUN_NUMBER"].data< unsigned int >();
+          if (run - runNumber < diff){
+            diff = run - runNumber;
+            row = cursor2.currentRow();
+            if (diff == 0) break;
+          }
+        }
+        if (diff != UINT_MAX){
+          histogramPropsRecordExist = true;
+          if (diff == 0){
+            if (row["DIMENSIONS"].data< int >() != histogram.dimNumber) exceptionThrow("Dimensions", histogram.path, run);
+            if (row["X_AXIS"].data< std::string >() != dimensionJson(histogram.dimX)) exceptionThrow("X_AXIS", histogram.path, run);
+            if (row["Y_AXIS"].data< std::string >() != dimensionJson(histogram.dimY)) exceptionThrow("Y_AXIS", histogram.path, run); 
+            if (row["Z_AXIS"].data< std::string >() != dimensionJson(histogram.dimZ)) exceptionThrow("Z_AXIS", histogram.path, run);
+            edm::LogWarning( "DQMDatabaseWriter" ) << "Trying to insert the path: " << histogram.path << " with the same run number: " << run
+                                                   << " and already existing the same values." << std::endl;
+          } else {
+            if (row["DIMENSIONS"].data< int >() != histogram.dimNumber ||
+                row["X_AXIS"].data< std::string >() != dimensionJson(histogram.dimX) ||
+                row["Y_AXIS"].data< std::string >() != dimensionJson(histogram.dimY) || 
+                row["Z_AXIS"].data< std::string >() != dimensionJson(histogram.dimZ)) 
+                histogramPropsRecordExist = false;
+          }
+        }
+      }
+    }
+
+    if(!histogramPropsRecordExist)
+    {
+      coral::ITableDataEditor& editor = m_session->nominalSchema().tableHandle( "HISTOGRAM_PROPS" ).dataEditor();
+      coral::AttributeList insertData;
+      insertData.extend< std::string >( "PATH" );
+      insertData.extend< unsigned int >( "RUN_NUMBER" );
+      insertData.extend< int >( "DIMENSIONS" );
+      insertData.extend< std::string >( "X_AXIS" );
+      insertData.extend< std::string >( "Y_AXIS" );
+      insertData.extend< std::string >( "Z_AXIS" );
+
+      insertData[ "PATH" ].data< std::string >() = histogram.path;
+      insertData[ "RUN_NUMBER" ].data< unsigned int >() = run;
+      insertData[ "DIMENSIONS" ].data< int >() = histogram.dimNumber; 
+      insertData[ "X_AXIS" ].data< std::string >() = dimensionJson(histogram.dimX);
+      insertData[ "Y_AXIS" ].data< std::string >() = dimensionJson(histogram.dimY);
+      insertData[ "Z_AXIS" ].data< std::string >() = dimensionJson(histogram.dimZ);
+      editor.insertRow( insertData );
+    }
+  }
+}
+
+//
+// -------------------------------------- dqmDbDrop --------------------------------------------
+//
+void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, unsigned int run, unsigned int lumisection)
+{
+  edm::LogInfo("DQMDatabaseWriter") <<  "DQMDatabaseWriter::" << __func__ << std::endl;
+  coral::ISchema& schema = m_session->nominalSchema();
+  for (auto histogram : stats)
+  {
+    std::unique_ptr<coral::IQuery> queryHistogramValues(schema.tableHandle( "HISTOGRAM_VALUES" ).newQuery());
+    queryHistogramValues->addToOutputList( "PATH" );
+    queryHistogramValues->addToOutputList( "RUN_NUMBER" );
+    queryHistogramValues->addToOutputList( "LUMISECTION" );
+
+    std::string condition = "PATH = :path AND RUN_NUMBER = :run AND LUMISECTION = :lumisection";
+    coral::AttributeList conditionData2;
+    conditionData2.extend< std::string >("path");
+    conditionData2["path"].data< std::string >() = histogram.path;
+    conditionData2.extend< unsigned int >("run");
+    conditionData2["run"].data< unsigned int >() = run;
+    conditionData2.extend< unsigned int >("lumisection");
+    conditionData2["lumisection"].data< unsigned int >() = lumisection;
+    queryHistogramValues->setCondition( condition, conditionData2 );
+    queryHistogramValues->setMemoryCacheSize( 5 );
+    coral::AttributeList readBuffer;
+    readBuffer.extend<std::string>("PATH");
+    readBuffer.extend<unsigned int>("RUN_NUMBER");
+    readBuffer.extend<unsigned int>("LUMISECTION");
+    queryHistogramValues->defineOutput(readBuffer);
+    coral::ICursor& cursor = queryHistogramValues->execute();
+    if (cursor.next()){
+      //cursor.currentRow().toOutputStream( std::cout ) << std::endl;
+      exceptionThrow("HISTOGRAM_VALUES", histogram.path, run);
+    }
+    coral::ITableDataEditor& editor = m_session->nominalSchema().tableHandle( "HISTOGRAM_VALUES" ).dataEditor();
+    coral::AttributeList insertData;
+    insertData.extend< std::string >( "PATH" );
+    insertData.extend< unsigned int >( "RUN_NUMBER" );
+    insertData.extend< unsigned int >( "LUMISECTION" );
+    insertData.extend< double >( "ENTRIES" );
+    insertData.extend< double >( "X_MEAN" );
+    insertData.extend< double >( "X_MEAN_ERROR" );
+    insertData.extend< double >( "X_RMS" );
+    insertData.extend< double >( "X_RMS_ERROR" );
+    insertData.extend< double >( "X_UNDERFLOW");
+    insertData.extend< double >( "X_OVERFLOW" );
+    insertData.extend< double >( "Y_MEAN" );
+    insertData.extend< double >( "Y_MEAN_ERROR" );
+    insertData.extend< double >( "Y_RMS" );
+    insertData.extend< double >( "Y_RMS_ERROR" );
+    insertData.extend< double >( "Y_UNDERFLOW");
+    insertData.extend< double >( "Y_OVERFLOW" );
+    insertData.extend< double >( "Z_MEAN" );
+    insertData.extend< double >( "Z_MEAN_ERROR" );
+    insertData.extend< double >( "Z_RMS" );
+    insertData.extend< double >( "Z_RMS_ERROR" );
+    insertData.extend< double >( "Z_UNDERFLOW");
+    insertData.extend< double >( "Z_OVERFLOW" );
+
+    insertData[ "PATH" ].data< std::string >() = histogram.path;
+    insertData[ "RUN_NUMBER" ].data< unsigned int >() = run;
+    insertData[ "LUMISECTION" ].data< unsigned int >() = lumisection;
+    insertData[ "ENTRIES" ].data< double >() = histogram.entries;
+    insertData[ "X_MEAN" ].data< double >() = histogram.dimX.mean;
+    insertData[ "X_MEAN_ERROR" ].data< double >() = histogram.dimX.meanError;
+    insertData[ "X_RMS" ].data< double >() = histogram.dimX.rms;
+    insertData[ "X_RMS_ERROR" ].data< double >() = histogram.dimX.rmsError;
+    insertData[ "X_UNDERFLOW" ].data< double >() = histogram.dimX.underflow;
+    insertData[ "X_OVERFLOW" ].data< double >() = histogram.dimX.overflow;
+    insertData[ "Y_MEAN" ].data< double >() = histogram.dimY.mean;
+    insertData[ "Y_MEAN_ERROR" ].data< double >() = histogram.dimY.meanError;
+    insertData[ "Y_RMS" ].data< double >() = histogram.dimY.rms;
+    insertData[ "Y_RMS_ERROR" ].data< double >() = histogram.dimY.rmsError;
+    insertData[ "Y_UNDERFLOW" ].data< double >() = 0.;
+    insertData[ "Y_OVERFLOW" ].data< double >() = 0.;
+    insertData[ "Z_MEAN" ].data< double >() = histogram.dimZ.mean;
+    insertData[ "Z_MEAN_ERROR" ].data< double >() = histogram.dimZ.meanError;
+    insertData[ "Z_RMS" ].data< double >() = histogram.dimZ.rms;
+    insertData[ "Z_RMS_ERROR" ].data< double >() = histogram.dimZ.rmsError;
+    insertData[ "Z_UNDERFLOW" ].data< double >() = 0.;
+    insertData[ "Z_OVERFLOW" ].data< double >() = 0.;
+    editor.insertRow( insertData );
+  }
+}
+
+  std::string DQMDatabaseWriter::toString(boost::property_tree::ptree doc){
+
+    boost::regex exp("\"([0-9]+(\\.[0-9]+)?)\"");
+    std::stringstream ss;
+    boost::property_tree::json_parser::write_json(ss, doc);
+    std::string rv = boost::regex_replace(ss.str(), exp, "$1");
+    return rv;
+  }
+
+  std::string DQMDatabaseWriter::dimensionJson(Dimension &dim){
+    using boost::property_tree::ptree;
+    if (dim.nBin == 0 && dim.low == 0 && dim.up == 0) return "{}";
+    ptree doc;
+    doc.put("bins", dim.nBin);
+    doc.put("low", dim.low);
+    doc.put("up", dim.up);
+    return toString(doc);
+  }
+
+  void DQMDatabaseWriter::exceptionThrow(std::string quantity, std::string path, unsigned int run){
+    rollbackTransaction();
+    throw cms::Exception( "DQMDatabaseWriter" ) << "Trying to insert already existing histogram: "
+                                                << path <<" with the same run number: " 
+                                                << run << " but different "
+                                                << quantity << " values.\n" << std::endl;
+  }
+
+
