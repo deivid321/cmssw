@@ -8,9 +8,8 @@
 
 namespace dqmservices {
 
-DQMHistogramDB::DQMHistogramDB(edm::ParameterSet const & ps) : DQMHistogramStats(ps){
-  dbw_.reset(new DQMDatabaseWriter(ps));
-  dbw_->initDatabase();
+DQMHistogramDB::DQMHistogramDB(edm::ParameterSet const & ps) : DQMHistogramStats(ps), dbw_(ps) {
+  dbw_.initDatabase();
 };
 
 void DQMHistogramDB::dqmEndLuminosityBlock(DQMStore::IBooker &,
@@ -20,12 +19,15 @@ void DQMHistogramDB::dqmEndLuminosityBlock(DQMStore::IBooker &,
   edm::LogInfo("DQMDatabaseHarvester") << "DQMDatabaseHarvester::dqmEndLuminosityBlock " << std::endl;
   if (dumpOnEndLumi_){
     HistoStats stats = (histogramNamesEndLumi_.size() > 0) ? collect(iGetter, histogramNamesEndLumi_) : collect(iGetter);
+    DQMScopedTransaction scopedTransaction(dbw_);
+    scopedTransaction.start();
     if (checkLumiHistos_) {
       std::cout << "RUN NUMBER OF MAX INT: " << UINT_MAX << std::endl;
-      dbw_->dqmPropertiesDbDrop(stats, iLumi.run());
+      dbw_.dqmPropertiesDbDrop(stats, iLumi.run());
       checkLumiHistos_ = false;
     }
-    dbw_->dqmValuesDbDrop(stats, iLumi.run(), iLumi.luminosityBlock());
+    dbw_.dqmValuesDbDrop(stats, iLumi.run(), iLumi.luminosityBlock());
+    scopedTransaction.commit();
   }
 }
 
@@ -37,9 +39,12 @@ void DQMHistogramDB::dqmEndRun(DQMStore::IBooker &,
     edm::LogInfo("DQMDatabaseHarvester") <<  "DQMDatabaseHarvester::endRun" << std::endl;
     HistoStats stats = (histograms_.size() > 0) ? collect(iGetter, histograms_) : collect(iGetter);
     std::cout << "RUN NUMBER OF RUN: " << iRun.run() << std::endl;
-    dbw_->dqmPropertiesDbDrop(stats, iRun.run());
+    DQMScopedTransaction scopedTransaction(dbw_);
+    scopedTransaction.start();
+    dbw_.dqmPropertiesDbDrop(stats, iRun.run());
     //for run based histograms, we use lumisection value set to 0.
-    dbw_->dqmValuesDbDrop(stats, iRun.run(), 0);
+    dbw_.dqmValuesDbDrop(stats, iRun.run(), 0);
+    scopedTransaction.commit();
   }
 }
 

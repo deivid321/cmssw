@@ -184,7 +184,7 @@ HistoStats DQMHistogramStats::collect(DQMStore::IGetter &iGetter, const std::vec
   HistoStats st;
 
   if (names.size() > 0) {
-    for (auto name: names) {  
+    for (auto name: names) {
       MonitorElement *m = iGetter.getElement(name); 
       auto frame = this->analyze(m); 
       st.insert(frame);

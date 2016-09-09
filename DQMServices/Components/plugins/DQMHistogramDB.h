@@ -21,8 +21,7 @@ class DQMHistogramDB : public DQMHistogramStats {
 
  private:
   bool checkLumiHistos_ = true;
-  std::unique_ptr<DQMDatabaseWriter> dbw_;
-
+  DQMDatabaseWriter dbw_;
 };
 
 }

@@ -220,13 +220,11 @@ void DQMDatabaseWriter::initDatabase()
   m_session->transaction().commit();
 
   edm::LogInfo("DQMExample_Step1") <<  "DQMExample_Step1::endLuminosityBlock" << std::endl;
-  m_session->transaction().start(false);
-
 }
 
-void DQMDatabaseWriter::startTransaction()
+void DQMDatabaseWriter::startTransaction(bool readOnly)
 {
-  m_session->transaction().start( false );
+  m_session->transaction().start( readOnly );
 
 }
 
@@ -247,11 +245,9 @@ void DQMDatabaseWriter::rollbackTransaction()
 void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, unsigned int run)
 {
   edm::LogInfo("DQMDatabaseWriter") <<  "DQMDatabaseWriter::" << __func__ << std::endl;
-
   bool histogramRecordExist;
   bool histogramPropsRecordExist;
   coral::ISchema& schema = m_session->nominalSchema();
-  m_session->transaction().start(false);
   for (auto histogram : stats)
   {
     histogramRecordExist = false;
@@ -355,7 +351,6 @@ void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, unsigned in
       editor.insertRow( insertData );
     }
   }
-  m_session->transaction().commit();
 }
 
 //
@@ -364,9 +359,7 @@ void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, unsigned in
 void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, unsigned int run, unsigned int lumisection)
 {
   edm::LogInfo("DQMDatabaseWriter") <<  "DQMDatabaseWriter::" << __func__ << std::endl;
-
   coral::ISchema& schema = m_session->nominalSchema();
-  m_session->transaction().start(false);
   for (auto histogram : stats)
   {
     std::unique_ptr<coral::IQuery> queryHistogramValues(schema.tableHandle( "HISTOGRAM_VALUES" ).newQuery());
@@ -389,7 +382,6 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, unsigned int ru
       cursor.currentRow().toOutputStream( std::cout ) << std::endl;
       exceptionThrow("HISTOGRAM_VALUES", histogram.path, run);
     }
-
     coral::ITableDataEditor& editor = m_session->nominalSchema().tableHandle( "HISTOGRAM_VALUES" ).dataEditor();
     coral::AttributeList insertData;
     insertData.extend< std::string >( "PATH" );
@@ -439,7 +431,6 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, unsigned int ru
     insertData[ "Z_OVERFLOW" ].data< double >() = 0.;
     editor.insertRow( insertData );
   }
-  m_session->transaction().commit();
 }
 
   std::string DQMDatabaseWriter::toString(boost::property_tree::ptree doc){
@@ -462,7 +453,7 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, unsigned int ru
   }
 
   void DQMDatabaseWriter::exceptionThrow(std::string quantity, std::string path, unsigned int run){
-    m_session->transaction().rollback();
+    rollbackTransaction();
     throw cms::Exception( "DQMDatabaseWriter" ) << "Trying to insert already existing histogram: "
                                                 << path <<" with the same run number: " 
                                                 << run << " but different "

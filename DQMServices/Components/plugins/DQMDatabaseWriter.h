@@ -54,7 +54,7 @@ public:
   virtual ~DQMDatabaseWriter();
   
   void initDatabase();
-  void startTransaction();
+  void startTransaction( bool readOnly = false );
   void commitTransaction();
   void rollbackTransaction();
   void dqmPropertiesDbDrop(const HistoStats &stats, unsigned int run);
@@ -76,8 +76,12 @@ class DQMScopedTransaction {
 public:
 	DQMScopedTransaction() = delete;
 	explicit DQMScopedTransaction( DQMDatabaseWriter& dbw ): m_dbw(dbw), m_committed(false) {}
-	~DQMScopedTransaction() {if (!m_committed) this->rollback();}
-	void start() {m_dbw.startTransaction();};
+	~DQMScopedTransaction() {
+		if (!m_committed) this->rollback();
+	}
+	void start(bool readOnly = false) {
+		m_dbw.startTransaction(readOnly);
+	}
 	void commit() {
 		m_dbw.commitTransaction();
 		m_committed = true;
@@ -85,7 +89,7 @@ public:
 	void rollback() {
 		m_dbw.rollbackTransaction();
 		m_committed = false;
-	};
+	}
 private:
 	DQMDatabaseWriter& m_dbw;
 	bool m_committed;
