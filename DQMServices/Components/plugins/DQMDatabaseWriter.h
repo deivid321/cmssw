@@ -54,9 +54,11 @@ public:
   virtual ~DQMDatabaseWriter();
   
   void initDatabase();
-
-  void dqmPropertiesDbDrop(const HistoStats &stats, int run);
-  void dqmValuesDbDrop(const HistoStats &stats, int run, int lumisection);
+  void startTransaction();
+  void commitTransaction();
+  void rollbackTransaction();
+  void dqmPropertiesDbDrop(const HistoStats &stats, unsigned int run);
+  void dqmValuesDbDrop(const HistoStats &stats, unsigned int run, unsigned int lumisection);
 
 protected:
   coral::ConnectionService m_connectionService;
@@ -66,8 +68,27 @@ protected:
 private:
   std::string toString(boost::property_tree::ptree doc);
   std::string dimensionJson(Dimension &dim);
-  void exceptionThrow(std::string quantity, std::string path, int run);
+  void exceptionThrow(std::string quantity, std::string path, unsigned int run);
 
+};
+
+class DQMScopedTransaction {
+public:
+	DQMScopedTransaction() = delete;
+	explicit DQMScopedTransaction( DQMDatabaseWriter& dbw ): m_dbw(dbw), m_committed(false) {}
+	~DQMScopedTransaction() {if (!m_committed) this->rollback();}
+	void start() {m_dbw.startTransaction();};
+	void commit() {
+		m_dbw.commitTransaction();
+		m_committed = true;
+	}
+	void rollback() {
+		m_dbw.rollbackTransaction();
+		m_committed = false;
+	};
+private:
+	DQMDatabaseWriter& m_dbw;
+	bool m_committed;
 };
 
 #endif

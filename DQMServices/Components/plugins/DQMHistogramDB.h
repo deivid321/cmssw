@@ -11,11 +11,6 @@ class DQMHistogramDB : public DQMHistogramStats {
  public:
   	DQMHistogramDB(edm::ParameterSet const & iConfig);
 
-  	void dqmBeginRun(DQMStore::IBooker &, 
-                            DQMStore::IGetter &iGetter,
-                            edm::Run const &iRun, 
-                            edm::EventSetup const&) override;
-
   	void dqmEndLuminosityBlock(DQMStore::IBooker &, DQMStore::IGetter &,
                              edm::LuminosityBlock const &,
                              edm::EventSetup const &) override;
@@ -25,6 +20,7 @@ class DQMHistogramDB : public DQMHistogramStats {
               edm::EventSetup const&) override;
 
  private:
+  bool checkLumiHistos_ = true;
   std::unique_ptr<DQMDatabaseWriter> dbw_;
 
 };

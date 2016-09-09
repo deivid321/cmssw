@@ -130,7 +130,7 @@ void DQMDatabaseWriter::initDatabase()
     coral::TableDescription table2;
     table2.setName( "HISTOGRAM_PROPS" );
     table2.insertColumn( "PATH", coral::AttributeSpecification::typeNameForType<std::string>(), columnSize, false );
-    table2.insertColumn( "RUN_NUMBER", coral::AttributeSpecification::typeNameForType<int>() );
+    table2.insertColumn( "RUN_NUMBER", coral::AttributeSpecification::typeNameForType<unsigned int>() );
     table2.insertColumn( "DIMENSIONS", coral::AttributeSpecification::typeNameForType<int>() );
     table2.insertColumn( "X_AXIS", coral::AttributeSpecification::typeNameForType<std::string>() );
     table2.insertColumn( "Y_AXIS", coral::AttributeSpecification::typeNameForType<std::string>() );
@@ -158,7 +158,7 @@ void DQMDatabaseWriter::initDatabase()
     coral::TableDescription table3;
     table3.setName( "HISTOGRAM_VALUES" );
     table3.insertColumn( "PATH", coral::AttributeSpecification::typeNameForType<std::string>(), columnSize, false );
-    table3.insertColumn( "RUN_NUMBER", coral::AttributeSpecification::typeNameForType<int>() );
+    table3.insertColumn( "RUN_NUMBER", coral::AttributeSpecification::typeNameForType<unsigned int>() );
     table3.insertColumn( "LUMISECTION", coral::AttributeSpecification::typeNameForType<int>() );
     table3.insertColumn( "ENTRIES", coral::AttributeSpecification::typeNameForType<double>() );
     table3.insertColumn( "X_MEAN", coral::AttributeSpecification::typeNameForType<double>() );
@@ -224,10 +224,27 @@ void DQMDatabaseWriter::initDatabase()
 
 }
 
+void DQMDatabaseWriter::startTransaction()
+{
+  m_session->transaction().start( false );
+
+}
+
+void DQMDatabaseWriter::commitTransaction()
+{
+  m_session->transaction().commit();
+
+}
+
+void DQMDatabaseWriter::rollbackTransaction()
+{
+  m_session->transaction().rollback();
+}
+
 //
 // -------------------------------------- dqmDbDrop --------------------------------------------
 //
-void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, int run)
+void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, unsigned int run)
 {
   edm::LogInfo("DQMDatabaseWriter") <<  "DQMDatabaseWriter::" << __func__ << std::endl;
 
@@ -282,23 +299,23 @@ void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, int run)
         coral::AttributeList conditionData2;
         conditionData2.extend< std::string >("path");
         conditionData2["path"].data< std::string >() = histogram.path;
-        conditionData2.extend< int >("run");
-        conditionData2["run"].data< int >() = run; 
+        conditionData2.extend< unsigned int >("run");
+        conditionData2["run"].data< unsigned int >() = run; 
         queryHistogramProps->setCondition( condition, conditionData2 );
         queryHistogramProps->setMemoryCacheSize( 5 );
         coral::ICursor& cursor2 = queryHistogramProps->execute();
-        long diff = LONG_MAX;
+        unsigned int diff = UINT_MAX;
         coral::AttributeList row;
         if (cursor2.next()){
           cursor2.currentRow().toOutputStream( std::cout ) << std::endl;
-          int runNumber = cursor2.currentRow()["RUN_NUMBER"].data< int >();
+          unsigned int runNumber = cursor2.currentRow()["RUN_NUMBER"].data< unsigned int >();
           if (run - runNumber < diff){
             diff = run - runNumber;
             row = cursor2.currentRow();
             if (diff == 0) break;
           }
         }
-        if (diff != LONG_MAX){
+        if (diff != UINT_MAX){
           histogramPropsRecordExist = true;
           if (diff == 0){
             if (row["DIMENSIONS"].data< int >() != histogram.dimNumber) exceptionThrow("Dimensions", histogram.path, run);
@@ -323,14 +340,14 @@ void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, int run)
       coral::ITableDataEditor& editor = m_session->nominalSchema().tableHandle( "HISTOGRAM_PROPS" ).dataEditor();
       coral::AttributeList insertData;
       insertData.extend< std::string >( "PATH" );
-      insertData.extend< int >( "RUN_NUMBER" );
+      insertData.extend< unsigned int >( "RUN_NUMBER" );
       insertData.extend< int >( "DIMENSIONS" );
       insertData.extend< std::string >( "X_AXIS" );
       insertData.extend< std::string >( "Y_AXIS" );
       insertData.extend< std::string >( "Z_AXIS" );
 
       insertData[ "PATH" ].data< std::string >() = histogram.path;
-      insertData[ "RUN_NUMBER" ].data< int >() = run;
+      insertData[ "RUN_NUMBER" ].data< unsigned int >() = run;
       insertData[ "DIMENSIONS" ].data< int >() = histogram.dimNumber; 
       insertData[ "X_AXIS" ].data< std::string >() = dimensionJson(histogram.dimX);
       insertData[ "Y_AXIS" ].data< std::string >() = dimensionJson(histogram.dimY);
@@ -344,7 +361,7 @@ void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, int run)
 //
 // -------------------------------------- dqmDbDrop --------------------------------------------
 //
-void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, int run, int lumisection)
+void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, unsigned int run, unsigned int lumisection)
 {
   edm::LogInfo("DQMDatabaseWriter") <<  "DQMDatabaseWriter::" << __func__ << std::endl;
 
@@ -361,10 +378,10 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, int run, int lu
     coral::AttributeList conditionData2;
     conditionData2.extend< std::string >("path");
     conditionData2["path"].data< std::string >() = histogram.path;
-    conditionData2.extend< int >("run");
-    conditionData2["run"].data< int >() = run;
-    conditionData2.extend< int >("lumisection");
-    conditionData2["lumisection"].data< int >() = lumisection;
+    conditionData2.extend< unsigned int >("run");
+    conditionData2["run"].data< unsigned int >() = run;
+    conditionData2.extend< unsigned int >("lumisection");
+    conditionData2["lumisection"].data< unsigned int >() = lumisection;
     queryHistogramValues->setCondition( condition, conditionData2 );
     queryHistogramValues->setMemoryCacheSize( 5 );
     coral::ICursor& cursor = queryHistogramValues->execute();
@@ -376,8 +393,8 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, int run, int lu
     coral::ITableDataEditor& editor = m_session->nominalSchema().tableHandle( "HISTOGRAM_VALUES" ).dataEditor();
     coral::AttributeList insertData;
     insertData.extend< std::string >( "PATH" );
-    insertData.extend< int >( "RUN_NUMBER" );
-    insertData.extend< int >( "LUMISECTION" );
+    insertData.extend< unsigned int >( "RUN_NUMBER" );
+    insertData.extend< unsigned int >( "LUMISECTION" );
     insertData.extend< double >( "ENTRIES" );
     insertData.extend< double >( "X_MEAN" );
     insertData.extend< double >( "X_MEAN_ERROR" );
@@ -399,8 +416,8 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, int run, int lu
     insertData.extend< double >( "Z_OVERFLOW" );
 
     insertData[ "PATH" ].data< std::string >() = histogram.path;
-    insertData[ "RUN_NUMBER" ].data< int >() = run;
-    insertData[ "LUMISECTION" ].data< int >() = lumisection;
+    insertData[ "RUN_NUMBER" ].data< unsigned int >() = run;
+    insertData[ "LUMISECTION" ].data< unsigned int >() = lumisection;
     insertData[ "ENTRIES" ].data< double >() = histogram.entries;
     insertData[ "X_MEAN" ].data< double >() = histogram.dimX.mean;
     insertData[ "X_MEAN_ERROR" ].data< double >() = histogram.dimX.meanError;
@@ -444,7 +461,7 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, int run, int lu
     return toString(doc);
   }
 
-  void DQMDatabaseWriter::exceptionThrow(std::string quantity, std::string path, int run){
+  void DQMDatabaseWriter::exceptionThrow(std::string quantity, std::string path, unsigned int run){
     m_session->transaction().rollback();
     throw cms::Exception( "DQMDatabaseWriter" ) << "Trying to insert already existing histogram: "
                                                 << path <<" with the same run number: " 
