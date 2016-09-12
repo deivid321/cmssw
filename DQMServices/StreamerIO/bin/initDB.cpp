@@ -21,19 +21,12 @@
 #include "RelationalAccess/ConnectionService.h"
 
 //STL includes
-#include <memory>
 #include <string>
-#include <utility>
 #include <vector>
-#include <set>
-#include <initializer_list>
 #include <iostream>
 #include <iomanip>
 #include <stdio.h>
-#include <sstream>
-#include <math.h>
 #include <ctime>
-#include <cmath>
 
 #include <boost/program_options.hpp>
 

@@ -1,6 +1,8 @@
 #ifndef DQMHistoStats_H
 #define DQMHistoStats_H
 
+#include <set>
+
 struct Dimension{
   int nBin = 0;
   double low = 0, up = 0;

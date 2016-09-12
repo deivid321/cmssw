@@ -1,7 +1,6 @@
 #include "DQMHistogramStats.h"
 
 #include "FWCore/ServiceRegistry/interface/Service.h"
-
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 namespace dqmservices {

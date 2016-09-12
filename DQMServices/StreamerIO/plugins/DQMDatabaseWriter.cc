@@ -1,6 +1,4 @@
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
 
 #include "DQMDatabaseWriter.h"
 
@@ -22,7 +20,6 @@
 #include "RelationalAccess/ITableDataEditor.h"
 #include "RelationalAccess/IQuery.h"
 #include "RelationalAccess/ICursor.h"
-
 
 //
 // -------------------------------------- Constructor --------------------------------------------

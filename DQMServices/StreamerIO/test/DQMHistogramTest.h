@@ -3,17 +3,20 @@
 
 //Framework
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Utilities/interface/InputTag.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-
-//event
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 //DQM
 #include "DQMServices/Core/interface/DQMEDAnalyzer.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "DQMServices/Core/interface/MonitorElement.h"
+
+//Include STL
+#include <iostream>
+#include <iomanip>
+#include <stdio.h>
+#include <string>
+#include <sstream>
+#include <math.h>
 
 class DQMHistogramTest: public DQMEDAnalyzer{
 

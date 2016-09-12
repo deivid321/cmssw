@@ -1,8 +1,8 @@
 #ifndef DQMHistogramDB_H
 #define DQMHistogramDB_H
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "DQMHistogramStats.h"
-
 #include "DQMDatabaseWriter.h"
 
 namespace dqmservices {

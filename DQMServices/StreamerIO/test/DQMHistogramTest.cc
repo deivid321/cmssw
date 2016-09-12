@@ -1,13 +1,5 @@
 #include "DQMHistogramTest.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "TF1.h"
-
-#include <iostream>
-#include <iomanip>
-#include <stdio.h>
-#include <string>
-#include <sstream>
-#include <math.h>
 
 //
 // -------------------------------------- Constructor --------------------------------------------

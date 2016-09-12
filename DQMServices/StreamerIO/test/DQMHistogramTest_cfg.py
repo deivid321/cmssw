@@ -45,7 +45,7 @@ process.load('DQMServices.StreamerIO.DQMHistogramTest_cfi')
 process.load("DQMServices.StreamerIO.DQMHistogramDB_cfi")
 [process.dqmHistogramDB.histogramNamesEndLumi.append( os.path.join(process.dqmHistogramTest.path.value(), x) ) for x in histoLumiList]
 [process.dqmHistogramDB.histogramNamesEndRun.append( os.path.join(process.dqmHistogramTest.path.value(), x) ) for x in histoRunList]
-process.dqmHistogramDB.connect = cms.string('sqlite_file:db2.db')
+process.dqmHistogramDB.connect = cms.string('sqlite_file:db1.db')
 
 # Input source
 process.source = cms.Source( "EmptySource",
