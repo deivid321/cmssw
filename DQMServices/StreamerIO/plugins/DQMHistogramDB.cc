@@ -22,7 +22,6 @@ void DQMHistogramDB::dqmEndLuminosityBlock(DQMStore::IBooker &,
     DQMScopedTransaction scopedTransaction(dbw_);
     scopedTransaction.start();
     if (checkLumiHistos_) {
-      std::cout << "RUN NUMBER OF MAX INT: " << UINT_MAX << std::endl;
       dbw_.dqmPropertiesDbDrop(stats, iLumi.run());
       checkLumiHistos_ = false;
     }
@@ -38,7 +37,6 @@ void DQMHistogramDB::dqmEndRun(DQMStore::IBooker &,
   if (dumpOnEndRun_){
     edm::LogInfo("DQMDatabaseHarvester") <<  "DQMDatabaseHarvester::endRun" << std::endl;
     HistoStats stats = (histograms_.size() > 0) ? collect(iGetter, histograms_) : collect(iGetter);
-    std::cout << "RUN NUMBER OF RUN: " << iRun.run() << std::endl;
     DQMScopedTransaction scopedTransaction(dbw_);
     scopedTransaction.start();
     dbw_.dqmPropertiesDbDrop(stats, iRun.run());

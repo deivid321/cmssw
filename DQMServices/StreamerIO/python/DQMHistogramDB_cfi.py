@@ -26,5 +26,5 @@ dqmHistogramDB = cms.EDAnalyzer("DQMHistogramDB",
 			enablePoolAutomaticCleanUp = cms.untracked.bool(False)
 			),
 
-    connect = cms.string('sqlite_file:db2.db'),
+    connect = cms.string(''),
 )

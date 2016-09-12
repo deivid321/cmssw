@@ -168,6 +168,7 @@ HistoStats DQMHistogramStats::collect(DQMStore::IGetter &iGetter, const std::set
 
   if (names.size() > 0) {
     for (auto name: names) {
+      if (name == "*") return this->collect(iGetter);
       std::cout << "***Getting MonitorElement " << name << " with IGetter" << std::endl;
       MonitorElement *m = iGetter.getElement(name); 
       auto frame = this->analyze(m); 
@@ -175,7 +176,6 @@ HistoStats DQMHistogramStats::collect(DQMStore::IGetter &iGetter, const std::set
     };
     return st;
   }
-
   return st;
 }
 
@@ -185,13 +185,13 @@ HistoStats DQMHistogramStats::collect(DQMStore::IGetter &iGetter, const std::vec
 
   if (names.size() > 0) {
     for (auto name: names) {
+      if (name == "*") return this->collect(iGetter);
       MonitorElement *m = iGetter.getElement(name); 
-      auto frame = this->analyze(m); 
+      auto frame = this->analyze(m);
       st.insert(frame);
     };
     return st;
   }
-
   return st;
 }
 

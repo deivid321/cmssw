@@ -159,7 +159,7 @@ void DQMDatabaseWriter::initDatabase()
     table3.setName( "HISTOGRAM_VALUES" );
     table3.insertColumn( "PATH", coral::AttributeSpecification::typeNameForType<std::string>(), columnSize, false );
     table3.insertColumn( "RUN_NUMBER", coral::AttributeSpecification::typeNameForType<unsigned int>() );
-    table3.insertColumn( "LUMISECTION", coral::AttributeSpecification::typeNameForType<int>() );
+    table3.insertColumn( "LUMISECTION", coral::AttributeSpecification::typeNameForType<unsigned int>() );
     table3.insertColumn( "ENTRIES", coral::AttributeSpecification::typeNameForType<double>() );
     table3.insertColumn( "X_MEAN", coral::AttributeSpecification::typeNameForType<double>() );
     table3.insertColumn( "X_MEAN_ERROR", coral::AttributeSpecification::typeNameForType<double>() );
@@ -299,6 +299,14 @@ void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, unsigned in
         conditionData2["run"].data< unsigned int >() = run; 
         queryHistogramProps->setCondition( condition, conditionData2 );
         queryHistogramProps->setMemoryCacheSize( 5 );
+        coral::AttributeList readBuffer;
+        readBuffer.extend<std::string>("PATH");
+        readBuffer.extend<unsigned int>("RUN_NUMBER");
+        readBuffer.extend<int>("DIMENSIONS");
+        readBuffer.extend< std::string >( "X_AXIS" );
+        readBuffer.extend< std::string >( "Y_AXIS" );
+        readBuffer.extend< std::string >( "Z_AXIS" );
+        queryHistogramProps->defineOutput(readBuffer);
         coral::ICursor& cursor2 = queryHistogramProps->execute();
         unsigned int diff = UINT_MAX;
         coral::AttributeList row;
@@ -377,6 +385,11 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, unsigned int ru
     conditionData2["lumisection"].data< unsigned int >() = lumisection;
     queryHistogramValues->setCondition( condition, conditionData2 );
     queryHistogramValues->setMemoryCacheSize( 5 );
+    coral::AttributeList readBuffer;
+    readBuffer.extend<std::string>("PATH");
+    readBuffer.extend<unsigned int>("RUN_NUMBER");
+    readBuffer.extend<unsigned int>("LUMISECTION");
+    queryHistogramValues->defineOutput(readBuffer);
     coral::ICursor& cursor = queryHistogramValues->execute();
     if (cursor.next()){
       cursor.currentRow().toOutputStream( std::cout ) << std::endl;

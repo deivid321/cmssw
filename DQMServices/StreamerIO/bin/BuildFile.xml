@@ -1,4 +1,4 @@
-<bin name="initDB" file="initDB.cc">
+<bin name="initDB" file="initDB.cpp">
   <use   name="FWCore/MessageLogger"/>
   <use   name="CoralBase"/>
   <use   name="CoralKernel"/>
