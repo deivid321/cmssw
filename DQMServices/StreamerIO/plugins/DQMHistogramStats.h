@@ -11,12 +11,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <iomanip>
-#include <utility>
-#include <fstream>
-#include <sstream>
 
-#include "FWCore/Framework/interface/stream/EDAnalyzer.h"
+
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DQMServices/Core/interface/DQMStore.h"
 #include "DQMServices/Core/interface/DQMEDHarvester.h"

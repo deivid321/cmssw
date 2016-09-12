@@ -1,3 +1,5 @@
+<use   name="CoralBase"/>
+<use   name="RelationalAccess"/>
 <use   name="FWCore/Framework"/>
 <use   name="FWCore/ServiceRegistry"/>
 <use   name="IOPool/Streamer"/>

@@ -1,12 +1,9 @@
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-
 //CORAL includes
-#include "CoralBase/AttributeList.h"
-#include "CoralBase/Attribute.h"
-#include "CoralBase/MessageStream.h"
 #include "CoralKernel/Context.h"
 #include "CoralKernel/IProperty.h"
 #include "CoralKernel/IPropertyManager.h"
+#include "CoralBase/AttributeList.h"
+#include "CoralBase/Attribute.h"
 #include "RelationalAccess/ISessionProxy.h"
 #include "RelationalAccess/IConnectionServiceConfiguration.h"
 #include "RelationalAccess/ISchema.h"
@@ -15,17 +12,12 @@
 #include "RelationalAccess/IPrimaryKey.h"
 #include "RelationalAccess/IForeignKey.h"
 #include "RelationalAccess/TableDescription.h"
-#include "RelationalAccess/ITableDataEditor.h"
-#include "RelationalAccess/IQuery.h"
-#include "RelationalAccess/ICursor.h"
 #include "RelationalAccess/ConnectionService.h"
 
 //STL includes
 #include <string>
 #include <vector>
 #include <iostream>
-#include <iomanip>
-#include <stdio.h>
 #include <ctime>
 
 #include <boost/program_options.hpp>
@@ -69,7 +61,7 @@ int main(int argc, char** argv){
     return ERROR_IN_COMMAND_LINE; 
   }
 
-  edm::LogInfo("DQMDatabaseWriter") <<  "Constructor DQMDatabaseWriter::" << __func__ << std::endl;
+  std::cout << "INFO: " <<  "Connnecting to " << m_connectionString << ", in " << __func__ << std::endl;
 
   coral::ConnectionService m_connectionService;
   std::unique_ptr<coral::ISessionProxy> m_session;
@@ -105,10 +97,13 @@ int main(int argc, char** argv){
   //pool automatic cleanup
   if(enablePoolAutomaticCleanUp) coralConfig.enablePoolAutomaticCleanUp();
   else coralConfig.disablePoolAutomaticCleanUp();
+
+  //authentication
+  coral::Context::instance().PropertyManager().property("AuthenticationFile")->set(authPath);
   
   //Starting init database
 
-  edm::LogInfo("DQMDatabaseWriter") <<  "DQMDatabaseWriter::" << __func__ << std::endl;
+  std::cout << "INFO: " <<  "Creating schema, in " << __func__ << std::endl;
 
   m_session.reset( m_connectionService.connect( m_connectionString, coral::Update ) );
   //TODO: do not run in production!
@@ -161,7 +156,7 @@ int main(int argc, char** argv){
 
     columnsForForeignKey2.push_back( "PATH" );
 
-    table2.createForeignKey( "table2_FK", columnsForForeignKey2, "HISTOGRAM", columnsForPrimaryKey1 );
+    table2.createForeignKey( "HISTOGRAM_PROPS_HISTOGRAM_FK", columnsForForeignKey2, "HISTOGRAM", columnsForPrimaryKey1 );
 
     schema.createTable( table2 );
 
@@ -224,11 +219,11 @@ int main(int argc, char** argv){
     columnsForForeignKey3.push_back( "PATH" );
     //columnsForForeignKey3.push_back( "RUN_NUMBER" );
 
-    table3.createForeignKey( "table2_FK", columnsForForeignKey3, "HISTOGRAM", columnsForPrimaryKey1 );
+    table3.createForeignKey( "HISTOGRAM_VALUES_HISTOGRAM_FK", columnsForForeignKey3, "HISTOGRAM", columnsForPrimaryKey1 );
 
     schema.createTable( table3 );
   }
   m_session->transaction().commit();
 
-  edm::LogInfo("DQMExample_Step1") <<  "DQMExample_Step1::endLuminosityBlock" << std::endl;
+  std::cout << "INFO: " <<  "Done, in " << __func__ << std::endl;
 }

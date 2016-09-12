@@ -11,12 +11,7 @@
 #include "DQMServices/Core/interface/MonitorElement.h"
 
 //Include STL
-#include <iostream>
-#include <iomanip>
-#include <stdio.h>
 #include <string>
-#include <sstream>
-#include <math.h>
 
 class DQMHistogramTest: public DQMEDAnalyzer{
 

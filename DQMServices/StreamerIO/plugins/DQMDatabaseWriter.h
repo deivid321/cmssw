@@ -1,23 +1,23 @@
-#ifndef DQMSERVICES_DATABASEIO_PLUGINS_DQMDATABASEWRITER_H
-#define DQMSERVICES_DATABASEIO_PLUGINS_DQMDATABASEWRITER_H
+#ifndef DQMSERVICES_STREAMERIO_PLUGINS_DQMDATABASEWRITER_H
+#define DQMSERVICES_STREAMERIO_PLUGINS_DQMDATABASEWRITER_H
 
+//local includes
+#include "DQMHistoStats.h"
+
+//Framework includes
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 //CORAL includes
 #include "RelationalAccess/ConnectionService.h"
+#include "RelationalAccess/ISessionProxy.h"
 
+//boost includes
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 //STL includes
 #include <string>
-#include <vector>
-#include <iostream>
-#include <iomanip>
-#include <stdio.h>
-
-#include "DQMHistoStats.h"
 
 class DQMDatabaseWriter {
 
@@ -26,7 +26,6 @@ public:
   DQMDatabaseWriter(const edm::ParameterSet& ps);
   virtual ~DQMDatabaseWriter();
   
-  void initDatabase();
   void startTransaction( bool readOnly = false );
   void commitTransaction();
   void rollbackTransaction();

@@ -3,6 +3,8 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
+#include <fstream>
+
 namespace dqmservices {
 
 DQMHistogramStats::DQMHistogramStats(edm::ParameterSet const & iConfig) 

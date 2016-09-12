@@ -1,7 +1,6 @@
 <bin name="initDB" file="initDB.cpp">
-  <use   name="FWCore/MessageLogger"/>
-  <use   name="CoralBase"/>
   <use   name="CoralKernel"/>
+  <use   name="CoralBase"/>
   <use   name="RelationalAccess"/>
   <use   name="boost_program_options"/>
 </bin>

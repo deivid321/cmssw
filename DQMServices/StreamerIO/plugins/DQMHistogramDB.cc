@@ -1,13 +1,13 @@
 #include "DQMHistogramDB.h"
 
-#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+
+#include <vector>
 
 namespace dqmservices {
 
-DQMHistogramDB::DQMHistogramDB(edm::ParameterSet const & ps) : DQMHistogramStats(ps), dbw_(ps) {
-  dbw_.initDatabase();
-};
+DQMHistogramDB::DQMHistogramDB(edm::ParameterSet const & ps) : DQMHistogramStats(ps), dbw_(ps) {}
 
 void DQMHistogramDB::dqmEndLuminosityBlock(DQMStore::IBooker &,
                                            DQMStore::IGetter &iGetter,
