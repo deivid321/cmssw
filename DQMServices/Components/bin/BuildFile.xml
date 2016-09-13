@@ -2,3 +2,9 @@
   <use name="DQMServices/Core"/>
   <use name="protobuf"/>
 </bin>
+<bin name="cmsdqm_initDB" file="cmsdqm_initDB.cpp">
+  <use   name="CoralKernel"/>
+  <use   name="CoralBase"/>
+  <use   name="RelationalAccess"/>
+  <use   name="boost_program_options"/>
+</bin>

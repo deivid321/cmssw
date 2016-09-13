@@ -37,16 +37,16 @@ process.load("DQMServices.Core.DQM_cfg")
 process.load("DQMServices.Components.DQMEnvironment_cfi")
 
 #my analyzer
-process.load('DQMServices.StreamerIO.DQMHistogramTest_cfi')
+process.load('DQMServices.Components.DQMHistogramTest_cfi')
 [process.dqmHistogramTest.histograms.append( x ) for x in histoLumiList]
 [process.dqmHistogramTest.histograms.append( x ) for x in histoRunList]
 
 #Database Dump
-process.load("DQMServices.StreamerIO.DQMHistogramDB_cfi")
+process.load("DQMServices.Components.DQMHistogramDB_cfi")
 [process.dqmHistogramDB.histogramNamesEndLumi.append( os.path.join(process.dqmHistogramTest.path.value(), x) ) for x in histoLumiList]
 [process.dqmHistogramDB.histogramNamesEndRun.append( os.path.join(process.dqmHistogramTest.path.value(), x) ) for x in histoRunList]
 process.dqmHistogramDB.connect = cms.string('oracle://cms_orcoff_prep/CMS_DQM_HISTO')
-process.dqmHistogramDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/user/d/dvoronec/private/authentication.xml')
+process.dqmHistogramDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/user/d/dvoronec/private')
 
 # Input source
 process.source = cms.Source( "EmptySource",

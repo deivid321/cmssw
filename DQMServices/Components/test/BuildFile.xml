@@ -1,3 +1,6 @@
+<use   name="CoralKernel"/>
+<use   name="CoralBase"/>
+<use   name="RelationalAccess"/>
 <use   name="DQMServices/Core"/>
 <use   name="FWCore/Framework"/>
 <use   name="FWCore/ParameterSet"/>
