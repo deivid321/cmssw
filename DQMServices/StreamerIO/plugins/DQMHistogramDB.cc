@@ -15,7 +15,7 @@ void DQMHistogramDB::dqmEndLuminosityBlock(DQMStore::IBooker &,
                                            edm::EventSetup const &) {
   edm::LogInfo("DQMDatabaseHarvester") << "DQMDatabaseHarvester::dqmEndLuminosityBlock " << std::endl;
   if (dumpOnEndLumi_){
-    HistoStats stats = (histogramNamesEndLumi_.size() > 0) ? collect(iGetter, histogramNamesEndLumi_) : collect(iGetter);
+    HistoStats stats = (histogramNamesEndLumi_.size() > 0) ? collect(iGetter, histogramNamesEndLumi_) : collect(iGetter); //TODO: fix names
     DQMScopedTransaction scopedTransaction(dbw_);
     scopedTransaction.start();
     if (checkLumiHistos_) {

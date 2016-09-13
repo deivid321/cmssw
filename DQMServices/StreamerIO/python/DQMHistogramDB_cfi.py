@@ -12,8 +12,8 @@ dqmHistogramDB = cms.EDAnalyzer("DQMHistogramDB",
     dumpOnEndRun = cms.untracked.bool(True),
     runOnEndJob = cms.untracked.bool(False),
     dumpToFWJR = cms.untracked.bool(True),
-    histogramNamesEndLumi = cms.untracked.vstring(),
-    histogramNamesEndRun = cms.untracked.vstring(),
+    histogramNamesEndLumi = cms.untracked.vstring("AlCaReco\/HcalIsoTrack\/hRatL3"),
+    histogramNamesEndRun = cms.untracked.vstring("AlCaReco\/HcalIsoTrack\/hRatL3"),
     
     #database configuration
     DBParameters = cms.PSet(authenticationPath = cms.untracked.string(''),
@@ -26,5 +26,6 @@ dqmHistogramDB = cms.EDAnalyzer("DQMHistogramDB",
 			enablePoolAutomaticCleanUp = cms.untracked.bool(False)
 			),
 
-    connect = cms.string(''),
+    connect = cms.string('oracle://cms_orcoff_prep/CMS_DQM_HISTO'),
+    authPath = cms.string('/afs/cern.ch/user/d/dvoronec/private/authentication.xml'),
 )

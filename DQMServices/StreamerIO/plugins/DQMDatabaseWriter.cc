@@ -3,6 +3,9 @@
 #include "DQMDatabaseWriter.h"
 
 // CORAL
+#include "CoralKernel/Context.h"
+#include "CoralKernel/IProperty.h"
+#include "CoralKernel/IPropertyManager.h"
 #include "CoralBase/AttributeList.h"
 #include "CoralBase/Attribute.h"
 #include "RelationalAccess/IConnectionServiceConfiguration.h"
@@ -22,7 +25,7 @@ DQMDatabaseWriter::DQMDatabaseWriter(const edm::ParameterSet& ps) : m_connection
 
   //Database connection configuration parameters
   edm::ParameterSet connectionParameters = ps.getParameter<edm::ParameterSet>("DBParameters");
-  std::string authPath = connectionParameters.getUntrackedParameter<std::string>("authPath", "");
+  std::string authPath = ps.getParameter<std::string>("authPath");
   int messageLevel = connectionParameters.getUntrackedParameter<int>("messageLevel",0);
   coral::MsgLevel level = coral::Error;
   switch (messageLevel) {
@@ -70,6 +73,10 @@ DQMDatabaseWriter::DQMDatabaseWriter(const edm::ParameterSet& ps) : m_connection
   //pool automatic cleanup
   if(enablePoolAutomaticCleanUp) coralConfig.enablePoolAutomaticCleanUp();
   else coralConfig.disablePoolAutomaticCleanUp();
+
+  std::cout <<"PATH: " << authPath << std::endl;
+  //authentication
+  coral::Context::instance().PropertyManager().property("AuthenticationFile")->set(authPath);
 
   m_session.reset( m_connectionService.connect( m_connectionString, coral::Update ) );
 

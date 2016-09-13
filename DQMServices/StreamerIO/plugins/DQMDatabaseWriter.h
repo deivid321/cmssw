@@ -7,6 +7,7 @@
 //Framework includes
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 
 //CORAL includes
 #include "RelationalAccess/ConnectionService.h"

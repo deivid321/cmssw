@@ -45,7 +45,8 @@ process.load('DQMServices.StreamerIO.DQMHistogramTest_cfi')
 process.load("DQMServices.StreamerIO.DQMHistogramDB_cfi")
 [process.dqmHistogramDB.histogramNamesEndLumi.append( os.path.join(process.dqmHistogramTest.path.value(), x) ) for x in histoLumiList]
 [process.dqmHistogramDB.histogramNamesEndRun.append( os.path.join(process.dqmHistogramTest.path.value(), x) ) for x in histoRunList]
-process.dqmHistogramDB.connect = cms.string('sqlite_file:db1.db')
+process.dqmHistogramDB.connect = cms.string('oracle://cms_orcoff_prep/CMS_DQM_HISTO')
+process.dqmHistogramDB.authPath = cms.string('/afs/cern.ch/user/d/dvoronec/private/authentication.xml')
 
 # Input source
 process.source = cms.Source( "EmptySource",
