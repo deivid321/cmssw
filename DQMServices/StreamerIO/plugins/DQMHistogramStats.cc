@@ -170,7 +170,6 @@ HistoStats DQMHistogramStats::collect(DQMStore::IGetter &iGetter, const std::set
   if (names.size() > 0) {
     for (auto name: names) {
       if (name == "*") return this->collect(iGetter);
-      std::cout << "***Getting MonitorElement " << name << " with IGetter" << std::endl;
       MonitorElement *m = iGetter.getElement(name); 
       auto frame = this->analyze(m); 
       st.insert(frame);
@@ -204,7 +203,6 @@ HistoStats DQMHistogramStats::collect(DQMStore::IGetter &iGetter) {
     auto frame = this->analyze(m);
     st.insert(frame);
   };
-  std::cout << "***Getting values with IGetter" << std::endl;
   // correct stream id don't matter - no booking will be done
   iGetter.getAllContents_(collect_f, "");
 

@@ -25,7 +25,7 @@ DQMDatabaseWriter::DQMDatabaseWriter(const edm::ParameterSet& ps) : m_connection
 
   //Database connection configuration parameters
   edm::ParameterSet connectionParameters = ps.getParameter<edm::ParameterSet>("DBParameters");
-  std::string authPath = ps.getParameter<std::string>("authPath");
+  std::string authPath = connectionParameters.getUntrackedParameter<std::string>("authenticationPath", "");
   int messageLevel = connectionParameters.getUntrackedParameter<int>("messageLevel",0);
   coral::MsgLevel level = coral::Error;
   switch (messageLevel) {
@@ -54,7 +54,6 @@ DQMDatabaseWriter::DQMDatabaseWriter(const edm::ParameterSet& ps) : m_connection
   m_connectionString = ps.getParameter<std::string>("connect");
   //now configure the DB connection
   coral::IConnectionServiceConfiguration& coralConfig = m_connectionService.configuration();
-  //TODO: set up the authentication mechanism
 
   // message streaming
   coral::MessageStream::setMsgVerbosity( level );
@@ -74,7 +73,6 @@ DQMDatabaseWriter::DQMDatabaseWriter(const edm::ParameterSet& ps) : m_connection
   if(enablePoolAutomaticCleanUp) coralConfig.enablePoolAutomaticCleanUp();
   else coralConfig.disablePoolAutomaticCleanUp();
 
-  std::cout <<"PATH: " << authPath << std::endl;
   //authentication
   coral::Context::instance().PropertyManager().property("AuthenticationFile")->set(authPath);
 
@@ -130,7 +128,7 @@ void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, unsigned in
       queryHistogramProps->setMemoryCacheSize( 5 );
       coral::ICursor& cursor2 = queryHistogramProps->execute();
       if (cursor2.next()){
-        cursor2.currentRow().toOutputStream( std::cout ) << std::endl;
+        //cursor2.currentRow().toOutputStream( std::cout ) << std::endl;
         histogramRecordExist = true;
       }
       if (!histogramRecordExist)
@@ -179,7 +177,7 @@ void DQMDatabaseWriter::dqmPropertiesDbDrop(const HistoStats &stats, unsigned in
         unsigned int diff = UINT_MAX;
         coral::AttributeList row;
         if (cursor2.next()){
-          cursor2.currentRow().toOutputStream( std::cout ) << std::endl;
+          //cursor2.currentRow().toOutputStream( std::cout ) << std::endl;
           unsigned int runNumber = cursor2.currentRow()["RUN_NUMBER"].data< unsigned int >();
           if (run - runNumber < diff){
             diff = run - runNumber;
@@ -260,7 +258,7 @@ void DQMDatabaseWriter::dqmValuesDbDrop(const HistoStats &stats, unsigned int ru
     queryHistogramValues->defineOutput(readBuffer);
     coral::ICursor& cursor = queryHistogramValues->execute();
     if (cursor.next()){
-      cursor.currentRow().toOutputStream( std::cout ) << std::endl;
+      //cursor.currentRow().toOutputStream( std::cout ) << std::endl;
       exceptionThrow("HISTOGRAM_VALUES", histogram.path, run);
     }
     coral::ITableDataEditor& editor = m_session->nominalSchema().tableHandle( "HISTOGRAM_VALUES" ).dataEditor();

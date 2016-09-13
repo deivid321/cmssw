@@ -15,15 +15,17 @@ void DQMHistogramDB::dqmEndLuminosityBlock(DQMStore::IBooker &,
                                            edm::EventSetup const &) {
   edm::LogInfo("DQMDatabaseHarvester") << "DQMDatabaseHarvester::dqmEndLuminosityBlock " << std::endl;
   if (dumpOnEndLumi_){
-    HistoStats stats = (histogramNamesEndLumi_.size() > 0) ? collect(iGetter, histogramNamesEndLumi_) : collect(iGetter); //TODO: fix names
-    DQMScopedTransaction scopedTransaction(dbw_);
-    scopedTransaction.start();
-    if (checkLumiHistos_) {
-      dbw_.dqmPropertiesDbDrop(stats, iLumi.run());
-      checkLumiHistos_ = false;
+      HistoStats stats = collect(iGetter, histogramNamesEndLumi_);
+      if (stats.size() > 0){
+      DQMScopedTransaction scopedTransaction(dbw_);
+      scopedTransaction.start();
+      if (checkLumiHistos_) {
+        dbw_.dqmPropertiesDbDrop(stats, iLumi.run());
+        checkLumiHistos_ = false;
+      }
+      dbw_.dqmValuesDbDrop(stats, iLumi.run(), iLumi.luminosityBlock());
+      scopedTransaction.commit();
     }
-    dbw_.dqmValuesDbDrop(stats, iLumi.run(), iLumi.luminosityBlock());
-    scopedTransaction.commit();
   }
 }
 
@@ -33,13 +35,15 @@ void DQMHistogramDB::dqmEndRun(DQMStore::IBooker &,
                             edm::EventSetup const&) {
   if (dumpOnEndRun_){
     edm::LogInfo("DQMDatabaseHarvester") <<  "DQMDatabaseHarvester::endRun" << std::endl;
-    HistoStats stats = (histograms_.size() > 0) ? collect(iGetter, histograms_) : collect(iGetter);
-    DQMScopedTransaction scopedTransaction(dbw_);
-    scopedTransaction.start();
-    dbw_.dqmPropertiesDbDrop(stats, iRun.run());
-    //for run based histograms, we use lumisection value set to 0.
-    dbw_.dqmValuesDbDrop(stats, iRun.run(), 0);
-    scopedTransaction.commit();
+    HistoStats stats = collect(iGetter, histograms_);
+    if (stats.size() > 0){
+      DQMScopedTransaction scopedTransaction(dbw_);
+      scopedTransaction.start();
+      dbw_.dqmPropertiesDbDrop(stats, iRun.run());
+      //for run based histograms, we use lumisection value set to 0.
+      dbw_.dqmValuesDbDrop(stats, iRun.run(), 0);
+      scopedTransaction.commit();
+    }
   }
 }
 

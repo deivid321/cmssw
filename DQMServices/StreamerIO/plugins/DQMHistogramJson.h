@@ -22,7 +22,7 @@ class DQMHistogramJson : public DQMHistogramStats {
 
  private:
  	std::string toString(boost::property_tree::ptree doc);
- 	void writeMemoryJson(const std::string &fn, const HistoStats &stats);
+ 	void writeMemoryJson(const std::string &fn, const HistoStats &stats, const unsigned int run,  const unsigned int lumi);
 
 };
 }
