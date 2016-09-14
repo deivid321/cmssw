@@ -9,16 +9,16 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
-//CORAL includes
-#include "RelationalAccess/ConnectionService.h"
-#include "RelationalAccess/ISessionProxy.h"
-
 //boost includes
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 //STL includes
 #include <string>
+
+namespace coral {
+  class ISessionProxy;
+}
 
 class DQMDatabaseWriter {
 
@@ -34,8 +34,7 @@ public:
   void dqmValuesDbDrop(const HistoStats &stats, unsigned int run, unsigned int lumisection);
 
 protected:
-  coral::ConnectionService m_connectionService;
-  std::unique_ptr<coral::ISessionProxy> m_session;
+  std::shared_ptr<coral::ISessionProxy> m_session;
   std::string m_connectionString;
 
 private:

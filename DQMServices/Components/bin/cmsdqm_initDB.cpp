@@ -33,14 +33,12 @@ int main(int argc, char** argv){
   //connection string
   std::string m_connectionString;
   bool debug;
-  std::string authPath;
   po::options_description opt("Allowed options");
   
   opt.add_options()
     ("help, h", "produce help message")
     ("connection, c", po::value<std::string>(&m_connectionString)->default_value("sqlite_file:db1.db"), "set connection string")
-    ("debug, d", po::value<bool>(&debug)->default_value(false), "set debug mode")
-    ("authPath, a", po::value<std::string>(&authPath)->default_value(""), "set authentication path");
+    ("debug, d", po::value<bool>(&debug)->default_value(false), "set debug mode");
 
   po::variables_map vm;
   try 
@@ -52,6 +50,13 @@ int main(int argc, char** argv){
       std::cout << "Databse initialization app" << std::endl << opt << std::endl; 
       return SUCCESS; 
     }
+
+    std::size_t found = m_connectionString.find("sqlite_file:");
+    if (found==std::string::npos){
+      std::cout << "The connection string must start with 'sqlite_file:'. " << '\n';
+      return ERROR_IN_COMMAND_LINE;
+    }
+
     po::notify(vm);
   } 
   catch(po::error& e) 
@@ -78,7 +83,6 @@ int main(int argc, char** argv){
   
   //now configure the DB connection
   coral::IConnectionServiceConfiguration& coralConfig = m_connectionService.configuration();
-  //TODO: set up the authentication mechanism
 
   // message streaming
   coral::MessageStream::setMsgVerbosity( level );
@@ -98,9 +102,7 @@ int main(int argc, char** argv){
   if(enablePoolAutomaticCleanUp) coralConfig.enablePoolAutomaticCleanUp();
   else coralConfig.disablePoolAutomaticCleanUp();
 
-  //authentication
-  coral::Context::instance().PropertyManager().property("AuthenticationFile")->set(authPath);
-  
+
   //Starting init database
 
   std::cout << "INFO: " <<  "Creating schema, in " << __func__ << std::endl;
