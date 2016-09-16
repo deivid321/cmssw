@@ -44,6 +44,8 @@ int main(int argc, char** argv){
   try 
   { 
     po::store(po::parse_command_line(argc, argv, opt),  vm);
+
+    po::notify(vm);
  
     if ( vm.count("help")  ) 
     { 
@@ -51,13 +53,12 @@ int main(int argc, char** argv){
       return SUCCESS; 
     }
 
+    std::cout << "CONN " << m_connectionString << std::endl;
     std::size_t found = m_connectionString.find("sqlite_file:");
     if (found==std::string::npos){
-      std::cout << "The connection string must start with 'sqlite_file:'. " << '\n';
+      std::cout << "The connection string must start with 'sqlite_file:'." << '\n';
       return ERROR_IN_COMMAND_LINE;
     }
-
-    po::notify(vm);
   } 
   catch(po::error& e) 
   { 
