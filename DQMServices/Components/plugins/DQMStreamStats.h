@@ -37,29 +37,13 @@ struct Node{
   std::vector<Node> children;
 };
 
-struct Dimension{
-  int nBin = 0;
-  double low = 0, up = 0;
-  double mean = 0, meanError = 0; 
-  double rms = 0, rmsError = 0; 
-  double underflow = 0, overflow = 0;  
-};
-
 class HistoEntry {
  public:
   std::string path;
-
-  std::string name;
-  const char *type;
   size_t bin_count = 0;
   size_t bin_size = 0;
   size_t extra = 0;
   size_t total = 0;
-  double entries = 0;
-  int maxBin = 0, minBin = 0;
-  double maxValue = 0, minValue = 0;
-  Dimension dimX, dimY, dimZ; 
-
   bool operator<(const HistoEntry &rhs) const { return path < rhs.path; }
 };
 
@@ -101,9 +85,6 @@ class DQMStreamStats : public DQMEDHarvester {
                                         const std::string &workflow, const std::string &child);
   std::string toString(boost::property_tree::ptree doc);
   std::string getStepName();
-  void getDimensionX(Dimension &d, MonitorElement *m);
-  void getDimensionY(Dimension &d, MonitorElement *m);
-  void getDimensionZ(Dimension &d, MonitorElement *m);
 
   std::string workflow_;
   std::string   child_;

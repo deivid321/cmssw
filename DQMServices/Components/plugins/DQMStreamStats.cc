@@ -21,135 +21,70 @@ DQMStreamStats::DQMStreamStats(edm::ParameterSet const & iConfig)
 
 DQMStreamStats::~DQMStreamStats() {}
 
-//Set all possible x dimension parameters
-void DQMStreamStats::getDimensionX(Dimension &d, MonitorElement *m){
-  d.nBin = m->getNbinsX();
-  d.low = m->getTH1()->GetXaxis()->GetXmin();
-  d.up = m->getTH1()->GetXaxis()->GetXmax();
-  d.mean = m->getTH1()->GetMean();
-  d.meanError = m->getTH1()->GetMeanError();
-  d.rms = m->getTH1()->GetRMS();
-  d.rmsError = m->getTH1()->GetRMSError();
-  d.underflow = m->getTH1()->GetBinContent(0);
-  d.overflow = m->getTH1()->GetBinContent(d.nBin + 1);
-}
-
-void DQMStreamStats::getDimensionY(Dimension &d, MonitorElement *m){
-  d.nBin = m->getNbinsY();
-  d.low = m->getTH1()->GetYaxis()->GetXmin();
-  d.up = m->getTH1()->GetYaxis()->GetXmax();
-  d.mean = m->getTH1()->GetMean(2);
-  d.meanError = m->getTH1()->GetMeanError(2);
-  d.rms = m->getTH1()->GetRMS(2);
-  d.rmsError = m->getTH1()->GetRMSError(2);
-}
-
-void DQMStreamStats::getDimensionZ(Dimension &d, MonitorElement *m){
-  d.nBin = m->getNbinsZ();
-  d.low = m->getTH1()->GetZaxis()->GetXmin();
-  d.up = m->getTH1()->GetZaxis()->GetXmax();
-  d.mean = m->getTH1()->GetMean(3);
-  d.meanError = m->getTH1()->GetMeanError(3);
-  d.rms = m->getTH1()->GetRMS(3);
-  d.rmsError = m->getTH1()->GetRMSError(3);
-}
-
 HistoEntry DQMStreamStats::analyze(MonitorElement *m) {
   HistoEntry e;
-  e.name = m->getName();
   e.path = m->getFullname();
-  e.type = "unknown";
 
   switch (m->kind()) {
     case MonitorElement::DQM_KIND_INVALID:
-      e.type = "INVALID";
       e.bin_size = -1;
       break;
     case MonitorElement::DQM_KIND_INT:
-      e.type = "INT";
       e.bin_size = sizeof(int);
       break;
     case MonitorElement::DQM_KIND_REAL:
-      e.type = "REAL";
       e.bin_size = sizeof(float);
       break;
     case MonitorElement::DQM_KIND_STRING:
-      e.type = "STRING";
       e.bin_size = sizeof(char);
       break;
 
     // one-dim ME
     case MonitorElement::DQM_KIND_TH1F:
-      e.type = "TH1F";
       e.bin_size = sizeof(float);
-      getDimensionX(e.dimX, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
     case MonitorElement::DQM_KIND_TH1S:
-      e.type = "TH1S";
       e.bin_size = sizeof(short);
-      getDimensionX(e.dimX, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
     case MonitorElement::DQM_KIND_TH1D:
-      e.type = "TH1D";
       e.bin_size = sizeof(double);
-      getDimensionX(e.dimX, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
     case MonitorElement::DQM_KIND_TPROFILE:
-      e.type = "TProfile";
       e.bin_size = sizeof(double);
-      getDimensionX(e.dimX, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
 
     // two-dim ME
     case MonitorElement::DQM_KIND_TH2F:
-      e.type = "TH2F";
       e.bin_size = sizeof(float);
-      getDimensionX(e.dimX, m);
-      getDimensionY(e.dimY, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
     case MonitorElement::DQM_KIND_TH2S:
-      e.type = "TH2S";
       e.bin_size = sizeof(short);
-      getDimensionX(e.dimX, m);
-      getDimensionY(e.dimY, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
     case MonitorElement::DQM_KIND_TH2D:
-      e.type = "TH2D";
       e.bin_size = sizeof(double);
-      getDimensionX(e.dimX, m);
-      getDimensionY(e.dimY, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
     case MonitorElement::DQM_KIND_TPROFILE2D:
-      e.type = "TProfile2D";
       e.bin_size = sizeof(double);
-      getDimensionX(e.dimX, m);
-      getDimensionY(e.dimY, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
 
     // three-dim ME
     case MonitorElement::DQM_KIND_TH3F:
-      e.type = "TH3F";
       e.bin_size = sizeof(float);
-      getDimensionX(e.dimX, m);
-      getDimensionY(e.dimY, m);
-      getDimensionZ(e.dimZ, m);
+      e.bin_count = m->getTH1()->GetNcells();
       break;
 
     default:
-      e.type = "unknown";
       e.bin_size = 0;
   };
   
-  // skip "INVALID", "INT", "REAL", "STRING", "unknown"
-  if (strcmp(e.type,"INVALID") && strcmp(e.type,"INT") && strcmp(e.type,"REAL") && strcmp(e.type,"STRING") && strcmp(e.type,"unknown")) {
-      e.bin_count = m->getTH1()->GetNcells();
-      e.entries = m->getEntries();
-      e.maxBin = m->getTH1()->GetMaximumBin();
-      e.minBin = m->getTH1()->GetMinimumBin();
-      e.maxValue = m->getTH1()->GetMaximum();
-      e.minValue = m->getTH1()->GetMinimum();
-  }
-
   e.total = e.bin_count * e.bin_size + e.extra;
 
   return e;
