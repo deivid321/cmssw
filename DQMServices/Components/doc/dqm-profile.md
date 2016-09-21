@@ -13,19 +13,21 @@ The application modules are:
 * customize_DQMStreamStats - configuration file to add DQMStreamStats module to the runTheMatrix command.
 * mbGraph.html, mbGraph.js, memoryGraph.js - Web application files which are copied to new created directory.
 
+UML class diagram is attached at the end.
+
 ### Workflow
 
 The process starts in dqm-profile.py script command.
 
-The script runs the runTheMatrix command with the passed number of matrix and with customization of DQMStreamStats module included.
+* The script runs the runTheMatrix command with the passed number of matrix and with customization of DQMStreamStats module included.
 
-The DQMStreamStats at the end of each lumisection and each run collects the sizes of all histograms and stores them in json format.
+* The DQMStreamStats at the end of each lumisection and each run collects the sizes of all histograms and stores them in json format.
 
-Then, the script transfers all the json files and web-page files to another directory which is now ready to show visualized memory usage of the histograms.
+* Then, the script transfers all the json files and web-page files to another directory which is now ready to show visualized memory usage of the histograms.
 
 ### dqm-profile usage
 
-The command: python dqm-profile.py runTheMatrix.py -l 25.0<br>
+The example command: python dqm-profile.py runTheMatrix.py -l 25.0<br>
 will runTheMatrix 25.0 with customized command and will create a default directory memory with the web page and json files in it.
 
 positional arguments:<br>
@@ -42,3 +44,6 @@ optional arguments:<br>
 ### Web page usage
 To choose the jsons files in web page there are url parameters 'profile' and 'reference'.<br>
 To mark the specific folder the user can click on it and save url with the marked path.
+
+### UML class diagram
+![alt text](uml_streamStats.png "Class diagram")
