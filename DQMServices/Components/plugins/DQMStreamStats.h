@@ -30,13 +30,6 @@
 
 namespace dqmservices {
 
-struct Node{
-  std::string name;
-  long size;
-  std::string parent;
-  std::vector<Node> children;
-};
-
 class HistoEntry {
  public:
   std::string path;
