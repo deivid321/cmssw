@@ -81,7 +81,7 @@ def show_data(properties):
     #    if (prop[0]!=0.0):
     #        nr += 1
     plot1, = ax.plot( x, y, 'ro', picker=5)
-    plt.axis([min(x) - 1, max(x) + 1, min(y) - 0.0001, max(y) + 0.0001])  # 0 values generate bottom==top error for axis, thats why +-0.0001
+    plt.axis([min(x) - 1, max(x) + 1, min(y)*0.98 - 0.0001, max(y)*1.02 + 0.0001])  # 0 values generate bottom==top error for axis, thats why +-0.0001
 
     read_data.ano = []
     for xy in zip(x, y):
@@ -103,7 +103,7 @@ def show_data(properties):
         y = properties[int(round(val))+1]
         plot1.set_ydata(y)
         ax.set_title(path + '\n' + property_name[int(round(val)) + 1])
-        ax.set_ylim([min(y) - 0.0001, max(y) + 0.0001])
+        ax.set_ylim([min(y)*0.98 - 0.0001, max(y)*1.02 + 0.0001])
         if show_data.isLabeled:
             for xy in zip(x, y):
                 read_data.ano.append(ax.annotate(' (%s)' % xy[1], xy=xy, textcoords='data'))
