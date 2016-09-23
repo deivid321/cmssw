@@ -41,9 +41,16 @@ optional arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-src SOURCE, --source SOURCE<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Source folder path of the already existing matrix directory.<br>
 
-### Web page usage
-To choose the jsons files in web page there are url parameters 'profile' and 'reference'.<br>
-To mark the specific folder the user can click on it and save url with the marked path.
-
 ### UML class diagram
 ![alt text](uml_streamStats.png "Class diagram")
+
+### Web page usage
+To choose the jsons files in web page there are url parameters 'profile' and 'reference' which loads the files.<br>
+To show the the histograms size of one file choose the 'profile' or 'reference' element in options list. <br>
+To see the comparison of the files choose 'difference profile' or 'diffrence reference'.<br>
+The comparison is done by substracting the values of each histogram.
+Considering profile is A and reference is B.<br>
+All the histograms showed in difference A meets this rule Ha - Hb > 0.<br>
+In difference B: Hb - Ha > 0.<br>
+If the minuend histogram doesn't exit, is considered as 0.<Br>
+To mark the specific folder the user can click on it and save url with the marked path.<br>
