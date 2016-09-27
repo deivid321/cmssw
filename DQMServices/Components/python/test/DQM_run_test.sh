@@ -23,12 +23,12 @@ do
   rm -f dqm_file.root
   echo -e "${COLOR_WARN}${testConfig}${COLOR_NORMAL}"
   #deleted ${postfix}
-  cmsRun ${LOCAL_TEST_DIR}/${testConfig} $bookIn  &> foo.log  || die "cmsRun ${testConfig}" $?
+  cmsRun ${LOCAL_TEST_DIR}/${testConfig} $bookIn  &> /dev/null  || die "cmsRun ${testConfig}" $?
 
   #check file4
   testConfig=dqmcheck_file.py
   echo -e "${COLOR_WARN}${testConfig}${COLOR_NORMAL}"
-  python ${LOCAL_TEST_DIR}/${testConfig} &> foo.log || die "cmsRun ${testConfig}" $?
+  python ${LOCAL_TEST_DIR}/${testConfig} &> /dev/null || die "cmsRun ${testConfig}" $?
 
   #HARVEST SINGLE FILES 
   testConfig=harv_file4_cfg.py
@@ -37,11 +37,7 @@ do
   cmsRun ${LOCAL_TEST_DIR}/${testConfig} &> /dev/null || die "cmsRun ${testConfig}" $?
 
   #CHECK HARVESTED FILE
-  echo -e "COMPARING with reference ${COLOR_WARN}DQM_V0001_R000000001__Test__File4__DQM.root${COLOR_NORMAL}"
-  compare_using_files.py DQM_V0001_R000000001__Test__File4__DQM.root /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/DQMTest/DQM_V0001_R000000001__Test__File1_oldf_REFERENCE__DQM.root -C -s b2b -t 0.999999 2> /dev/null | grep 'Successes: 100.00%'
-  echo -e "COMPARING with reference ${COLOR_WARN}DQM_V0001_R000000002__Test__File4__DQM.root${COLOR_NORMAL}"
-  compare_using_files.py DQM_V0001_R000000002__Test__File4__DQM.root /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/DQMTest/DQM_V0001_R000000002__Test__File3_REFERENCE__DQM.root  -C -s b2b -t 0.999999 2> /dev/null | grep 'Successes: 100.00%'
-
+  python compare-dqm.py DQM_create_file_cfg_DQMR000000002Default.json DQM_V0001_R000000002__Test__File4__DQM.root db1.db
 
 done
 

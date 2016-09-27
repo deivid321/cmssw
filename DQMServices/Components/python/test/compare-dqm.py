@@ -1,4 +1,3 @@
-
 import sys
 import sqlite3
 from datetime import datetime
@@ -10,8 +9,6 @@ from optparse import OptionParser
 import json
 from Utilities.RelMon.utils_v2 import ComparisonError, tests, init_database, get_version
 from Utilities.RelMon.web.app_utils import get_release, get_stats, get_percentage, get_img_url, get_dataset_name
-
-parser = OptionParser(usage='Usage: %prog <jsonFile> <rootFile> <dbFile> ')
 
 def compare(jsonFile, root, db):
     #Load json file
@@ -60,6 +57,7 @@ def compare(jsonFile, root, db):
     print "Json and database are the same: " + str(isTheSame)
     print 'Comparison finished'
 
+
 def walk_through(directory, f1, names, rms, diff, path=''):
     for elem in directory.GetListOfKeys():
         elem_name = elem.GetName()
@@ -82,65 +80,15 @@ def walk_through(directory, f1, names, rms, diff, path=''):
                     print "UNEQUALS: " + dataStr
                     diff.append("UNEQUALS " + dataStr)
     return diff
-                #print "Histogram: %s/%s, Title: %s, Number of Entries: %d" %(directory.GetPath(), hist1.GetName(), hist1.GetTitle(), hist1.GetEntries() )
-                #print hist1.GetRMS()
 
 
-def compare1(filename1):
-    if not 'TFile' in globals():
-        from ROOT import TFile
-    f1 = TFile(filename1)
-
-    ## Create Directory and HistogramComparison structure in the DB
-    dir_DQMData = f1.GetDirectory("DQMData")
-    dir_Run = None
-    for elem in dir_DQMData.GetListOfKeys():
-        elem_name = elem.GetName()
-        if elem_name.startswith('Run '):
-            dir_Run = dir_DQMData.Get(elem_name)
-
-    walk_through(dir_Run, f1)
-
-    f1.Close()
-    print "done"
-
-
-# def loopdir( TDirectory *source ):
-#   #source->ls();
-#   source->cd();
-#   TIter nextkey( source->GetListOfKeys() )
-#   TKey *key
-#   while( ( key = (TKey*)nextkey() ) )
-#     TClass *cl = gROOT->GetClass( key->GetClassName() )
-#     if( !cl ) continue
-#     if( cl->InheritsFrom( TDirectory::Class() ) )
-#       source->cd(key->GetName())
-#       TDirectory *subdir = gDirectory
-#       print "Dir: " + gDirectory->GetName() + ", Path: " + gDirectory->GetPath() + "\n"
-#       loopdir( subdir )
-#          else if( cl->InheritsFrom( "TH1" ) ):
-#       TH1 *h = (TH1*)key->ReadObj();
-#       print "Histogram: " + gDirectory->GetPath() + "/" + h->GetName()
-#                 + ", Title: " + h->GetTitle()
-#                 + ", Number of Entries: " + h->GetEntries()
-#                 + "\n"
-
-
-
-
-
-
-
-
-
-
+parser = OptionParser(usage='Usage: %prog <jsonFile> <rootFile> <dbFile> ')
 if __name__ == '__main__':
     opts, args = parser.parse_args()
     if len(args) != 3:
         parser.error('Specify three files to use for the comparison.')
 
     #print 'Comparing files:\n%s\n%s\n' % (basename(args[0]), basename(args[1]))
-    #res = compare(args[0], args[1])
     print basename(args[0])
     print basename(args[1])
     print basename(args[2])
