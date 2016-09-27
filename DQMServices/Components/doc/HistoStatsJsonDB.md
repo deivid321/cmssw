@@ -55,5 +55,13 @@ Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;specify run (but no luminosity), program will display<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plots of histogram properties vs luminosities<br>
 
+### Implemented tests
+There is automated test: python/test/run_JsonDB_test.sh.<br>
+The steps of test:
+* Creates histograms in DQMStore and runs included module in it which stores histograms properties into json files and database.
+* Check with check_file_JsonDB.py the values of histograms.
+* Harvests the root file with harv_fileJsonDB_cfg.py.
+* Compares Json file to root file and to database.
+
 ### UML class diagram
 ![alt text](uml_HistoStatsJsonDB.png "Class diagram")
