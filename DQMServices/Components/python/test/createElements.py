@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 import FWCore.ParameterSet.Config as cms
 
+maxNumberOfEvents = 10
+#original 10
+
+def createEventsToProcess():
+    return cms.untracked.PSet(input = cms.untracked.int32(maxNumberOfEvents))
+
 def createElements():
     elements = list()
-    for i in xrange(0,10):
+    for i in xrange(0, maxNumberOfEvents):
         elements.append(cms.untracked.PSet(lowX   = cms.untracked.double(0),
-                                           highX  = cms.untracked.double(11),
-                                           nchX   = cms.untracked.int32(11),
+                                           highX  = cms.untracked.double(maxNumberOfEvents+1),
+                                           nchX   = cms.untracked.int32(maxNumberOfEvents+1),
                                            name   = cms.untracked.string("Foo"+str(i)),
                                            title  = cms.untracked.string("Foo"+str(i)),
                                            value  = cms.untracked.double(i),
@@ -17,7 +23,7 @@ def createElements():
                                        name   = cms.untracked.string("Bar0"),
                                        title  = cms.untracked.string("Bar0"),
                                        value  = cms.untracked.double(-1),
-                                       values = cms.untracked.vdouble([i for i in range(0,11)])))
+                                       values = cms.untracked.vdouble([i for i in range(0, 11)])))
 
     elements.append(cms.untracked.PSet(lowX   = cms.untracked.double(0),
                                        highX  = cms.untracked.double(11),
@@ -25,38 +31,38 @@ def createElements():
                                        name   = cms.untracked.string("Bar1"),
                                        title  = cms.untracked.string("Bar1"),
                                        value  = cms.untracked.double(-1),
-                                       values = cms.untracked.vdouble([10 - i for i in range(0,11)])))
+                                       values = cms.untracked.vdouble([10 - i for i in range(0, 11)])))
     return elements
 
 def createReadRunElements():
     readRunElements = list()
-    for i in xrange(0,10):
+    for i in xrange(0,maxNumberOfEvents):
         readRunElements.append(cms.untracked.PSet(name    = cms.untracked.string("Foo"+str(i)),
-                                                  means   = cms.untracked.vdouble(i),
-                                                  entries = cms.untracked.vdouble(1)
+                                                  means   = cms.untracked.vdouble([i for x in xrange(0,maxNumberOfEvents)]),
+                                                  entries = cms.untracked.vdouble([maxNumberOfEvents for x in xrange(0,maxNumberOfEvents)])
         ))
     readRunElements.append(cms.untracked.PSet(name    = cms.untracked.string("Bar0"),
                                               means   = cms.untracked.vdouble(7),
-                                              entries = cms.untracked.vdouble(55)))
+                                              entries = cms.untracked.vdouble(55*maxNumberOfEvents)))
     readRunElements.append(cms.untracked.PSet(name    = cms.untracked.string("Bar1"),
                                               means   = cms.untracked.vdouble(3),
-                                              entries = cms.untracked.vdouble(55)))
+                                              entries = cms.untracked.vdouble(55*maxNumberOfEvents)))
     return readRunElements
 
 def createReadLumiElements():
     readLumiElements = list()
-    for i in xrange(0,10):
+    for i in xrange(0,maxNumberOfEvents):
         readLumiElements.append(cms.untracked.PSet(name=cms.untracked.string("Foo"+str(i)),
-                                                   means = cms.untracked.vdouble([i for x in xrange(0,10)]),
-                                                   entries=cms.untracked.vdouble([1 for x in xrange(0,10)])
+                                                   means = cms.untracked.vdouble([i for x in xrange(0, maxNumberOfEvents)]),
+                                                   entries=cms.untracked.vdouble([1 for x in xrange(0, maxNumberOfEvents)])
                                                    ))
     readLumiElements.append(cms.untracked.PSet(name=cms.untracked.string("Bar0"),
-                                               means = cms.untracked.vdouble([7 for x in xrange(0,10)]),
-                                               entries=cms.untracked.vdouble([55 for x in xrange(0,10)])
+                                               means = cms.untracked.vdouble([7 for x in xrange(0, 10)]),
+                                               entries=cms.untracked.vdouble([55 for x in xrange(0, 10)])
                                                ))
     readLumiElements.append(cms.untracked.PSet(name=cms.untracked.string("Bar1"),
-                                               means = cms.untracked.vdouble([3 for x in xrange(0,10)]),
-                                               entries=cms.untracked.vdouble([55 for x in xrange(0,10)])
+                                               means = cms.untracked.vdouble([3 for x in xrange(0, 10)]),
+                                               entries=cms.untracked.vdouble([55 for x in xrange(0, 10)])
                                                ))
     return readLumiElements
 
@@ -66,8 +72,8 @@ def createReadRunElements_merged_file1_file2():
     readRunElements = list()
     for i in xrange(0,10):
         readRunElements.append(cms.untracked.PSet(name    = cms.untracked.string("Foo"+str(i)),
-                                                  means   = cms.untracked.vdouble(i),
-                                                  entries = cms.untracked.vdouble(2)
+                                                  means   = cms.untracked.vdouble([1 for x in xrange(0,10)]),
+                                                  entries = cms.untracked.vdouble([1 for x in xrange(0,10)])
         ))
     readRunElements.append(cms.untracked.PSet(name    = cms.untracked.string("Bar0"),
                                               means   = cms.untracked.vdouble(7),

@@ -8,7 +8,8 @@ process =cms.Process("TEST")
 b = booking.BookingParams(sys.argv)
 b.doCheck(testOnly=False)
 
-process.source = cms.Source("EmptySource", numberEventsInRun = cms.untracked.uint32(100),
+process.source = cms.Source("EmptySource",
+                            numberEventsInRun = cms.untracked.uint32(100),
                             firstLuminosityBlock = cms.untracked.uint32(1),
                             firstEvent = cms.untracked.uint32(1000),
                             firstRun = cms.untracked.uint32(2),
@@ -17,6 +18,10 @@ process.source = cms.Source("EmptySource", numberEventsInRun = cms.untracked.uin
 elements = c.createElements()
 readRunElements = c.createReadRunElements()
 readLumiElements = c.createReadLumiElements()
+eventsToProcess = c.createEventsToProcess()
+
+process.maxEvents = eventsToProcess
+
 dqm_folder = "TestFolder/"
 lumi_extension = "_lumi"
 
@@ -59,9 +64,7 @@ if b.multithread():
     process.o.remove(process.reader)
 
 #My code
-process.o.remove(process.reader)
-
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
+#process.o.remove(process.reader)
 
 process.schedule = cms.Schedule(process.p, process.o)
 

@@ -23,16 +23,16 @@ do
   rm -f dqm_file.root
   echo -e "${COLOR_WARN}${testConfig}${COLOR_NORMAL}"
   #deleted ${postfix}
-  cmsRun ${LOCAL_TEST_DIR}/${testConfig} $bookIn  &> /dev/null  || die "cmsRun ${testConfig}" $?
+  cmsRun ${LOCAL_TEST_DIR}/${testConfig} $bookIn  &> foo  || die "cmsRun ${testConfig}" $?
 
   #check file4
-  testConfig=dqmcheck_file.py
+  testConfig=dqm-check_file.py
   echo -e "${COLOR_WARN}${testConfig}${COLOR_NORMAL}"
-  python ${LOCAL_TEST_DIR}/${testConfig} &> /dev/null || die "cmsRun ${testConfig}" $?
+  python ${LOCAL_TEST_DIR}/${testConfig} &> foo || die "cmsRun ${testConfig}" $?
 
   #HARVEST SINGLE FILES 
-  testConfig=harv_file4_cfg.py
-  rm -f DQM_V0001_R00000000?__Test__File4__DQM.root
+  testConfig=dqm-harv_file_cfg.py
+  rm -f DQM_V0001_R000000002__Test__File4__DQM.root
   echo -e "${COLOR_WARN}${testConfig}${COLOR_NORMAL}"
   cmsRun ${LOCAL_TEST_DIR}/${testConfig} &> /dev/null || die "cmsRun ${testConfig}" $?
 
