@@ -11,7 +11,7 @@ process.load("DQMServices.Components.DQMFileSaver_cfi")
 
 # Input source
 process.source = cms.Source("DQMRootSource",
-                            fileNames = cms.untracked.vstring("file:dqm_file.root"))
+                            fileNames = cms.untracked.vstring("file:file_JsonDB.root"))
 
 elements = c.createElements()
 
@@ -26,7 +26,7 @@ process.eff = cms.EDAnalyzer("DQMGenericClient",
                              resolution = cms.vstring(),
                              subDirs = cms.untracked.vstring(folder))
 
-process.dqmSaver.workflow = cms.untracked.string("/Test/File4/DQM")
+process.dqmSaver.workflow = cms.untracked.string("/Test/FileJsonDB/DQM")
 process.dqmSaver.saveByLumiSection = cms.untracked.int32(1)
 process.dqmSaver.saveByRun = cms.untracked.int32(1)
 

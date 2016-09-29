@@ -51,7 +51,7 @@ process.reader = cms.EDAnalyzer("DummyTestReadDQMStore",
     )
 
 process.out = cms.OutputModule("DQMRootOutputModule",
-                               fileName = cms.untracked.string("dqm_file.root"))
+                               fileName = cms.untracked.string("file_JsonDB.root"))
 
 process.p = cms.Path(process.filler)
 process.o = cms.EndPath(process.out+process.reader)
@@ -63,28 +63,20 @@ if b.multithread():
     process.DQMStore.enableMultiThread = cms.untracked.bool(True)
     process.o.remove(process.reader)
 
-#My code
-#process.o.remove(process.reader)
-
 process.schedule = cms.Schedule(process.p, process.o)
 
 process.load("DQMServices.Components.DQMHistogramDB_cfi")
 process.dqmHistogramDB.histogramNamesEndLumi.extend(histoLumiList)
 process.dqmHistogramDB.histogramNamesEndRun.extend(histoRunList)
-process.dqmHistogramDB.connect = cms.string('sqlite_file:db1.db')
+process.dqmHistogramDB.connect = cms.string('sqlite_file:file_JsonDB.db')
 
-# authentication system for the ESSources in the process:
-# when using pure CORAL in the DQM DB writer,
-# we need to use XML files, i.e. set the auth system to 2
-#process.GlobalTag.DBParameters.authenticationSystem = cms.untracked.int32(2)
-#process.loadRecoTauTagMVAsFromPrepDB.DBParameters.authenticationSystem = cms.untracked.int32(2)
 
 # authentication system for the DQM DB writer:
-# when using pure CORAL, the auth system is XML based and cannot be chosen,
-# so we need to customise ESSources;
-# when using Cond API, you can decide which one #to use
-process.dqmHistogramDB.DBParameters.authenticationSystem = cms.untracked.int32(2)
-process.dqmHistogramDB.DBParameters.authenticationPath = cms.untracked.string('/afs/cern.ch/user/d/dvoronec/private')
+# when using pure CORAL, the auth system is XMLbased and cannot be chosen,
+# so we need to customise ESSources with authentication system type 2;
+# when using Cond API, you can decide which one to use: default 0 is key based.
+#process.dqmHistogramDB.DBParameters.authenticationSystem = cms.untracked.int32(0)
+#process.dqmHistogramDB.DBParameters.authenticationPath = cms.untracked.string('')
 
 process.stats = cms.EndPath(process.dqmHistogramDB) 
 process.schedule.append(process.stats)
